@@ -9,8 +9,6 @@
     <!-- 包括所有已编译的插件 -->
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/bootstrap-tab.js"></script>
-    <script src="/js/echarts.min.js"></script>
-    <script src="/js/chart.js"></script>
 </head>
 <body style="width:100%;height:100%;">
 <nav class="navbar navbar-default navbar-static-top" role="navigation"
@@ -88,41 +86,36 @@
         <ol class="breadcrumb" style="margin-bottom:0">
             <li><a href="/">首页</a></li>
             <li><a href="/course">本科生课程管理</a></li>
-            <li><a href="/course/2">数据结构2</a></li>
+            <li><a href="/course/${courseId}">数据结构2</a></li>
         </ol>
         <ul class="nav nav-pills" style="margin-top: 15px">
             <li role="presentation" class="active">
-                <a href="/course/2/studentList">
+                <a href="/course/${courseId}/studentList">
                     学生名单
                 </a>
             </li>
             <li role="presentation">
-                <a href="/course/2/record">
-                    平时成绩
-                </a>
-            </li>
-            <li role="presentation">
-                <a href="/course/2/announcement">
+                <a href="/course/${courseId}/announcement">
                     发布
                 </a>
             </li>
             <li role="presentation">
-                <a href="/course/2/homework">
+                <a href="/course/${courseId}/homework">
                     平时作业
                 </a>
             </li>
             <li role="presentation">
-                <a href="/course/2/problem">
+                <a href="/course/${courseId}/problem">
                     学生问题
                 </a>
             </li>
             <li role="presentation">
-                <a href="/course/2/discussion">
+                <a href="/course/${courseId}/discussion">
                     发布研讨
                 </a>
             </li>
             <li role="presentation">
-                <a href="/course/2/weight">
+                <a href="/course/${courseId}/weight">
                     修改权重
                 </a>
             </li>
@@ -144,7 +137,11 @@
                             <td>${student.studentId}</td>
                             <td>${student.studentName}</td>
                             <td>
-                                <button class="btn btn-primary">查看/修改成绩</button>
+                                <button class="btn btn-primary"
+                                        data-toggle="modal" data-target="#scoreDetail"
+                                        data-student="${student.studentId}"
+                                >查看成绩/提交成绩
+                                </button>
                             </td>
                         </tr>
                     </#list>
@@ -154,5 +151,80 @@
         </div>
     </div>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="scoreDetail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">成绩详情</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <td>项目名</td>
+                        <td>得分</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+
+                <form class="form-horizontal" action="/course/record/${courseId}" method="post">
+                    <input type="hidden" name="studentId" id="studentIdInput">
+                    <div class="form-group">
+                        <label for="eventName" class="col-md-2 control-label">项目名</label>
+                        <div class="col-md-6">
+                            <select id="eventName" class="form-control" name="eventName">
+                                <option value="出勤">出勤</option>
+                                <option value="上机">上机</option>
+                                <option value="研讨">研讨</option>
+                                <option value="期末">期末</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="score" class="col-md-2 control-label">得分</label>
+                        <div class="col-md-6">
+                            <input id="score" type="text" class="form-control" name="score">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2 col-md-offset-3">
+                            <button type="submit" class="btn btn-primary">提交成绩</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#scoreDetail').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var studentId = button.data("student");
+        // var courseId=button.data("queryCourse");
+        //TODO adding ajax query here
+        $.getJSON("/course/${courseId}/getScore/" + studentId, function (data) {
+            data.forEach(function (datum) {
+                modal.find('tbody').append("" +
+                    "<tr>" +
+                    "   <td>" + datum.eventName + "</td>" +
+                    "   <td>" + datum.score + "</td>" +
+                    "</tr>")
+            })
+        });
+        var modal = $(this);
+        modal.find('.modal-title').text(studentId + "成绩详细");
+        modal.find('#studentIdInput').val(studentId);
+    });
+</script>
 </body>
 </html>

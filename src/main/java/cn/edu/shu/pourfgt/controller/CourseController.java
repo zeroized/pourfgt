@@ -2,14 +2,17 @@ package cn.edu.shu.pourfgt.controller;
 
 import cn.edu.shu.pourfgt.dataSource.dao.CourseInfoRepository;
 import cn.edu.shu.pourfgt.dataSource.dao.CourseRegularGradeEventRepository;
+import cn.edu.shu.pourfgt.dataSource.dao.CourseRegularGradeRecordRepository;
 import cn.edu.shu.pourfgt.dataSource.dao.CourseStudentRepository;
 import cn.edu.shu.pourfgt.dataSource.entity.CourseInfo;
 import cn.edu.shu.pourfgt.dataSource.entity.CourseRegularGradeEvent;
+import cn.edu.shu.pourfgt.dataSource.entity.CourseRegularGradeRecord;
 import cn.edu.shu.pourfgt.dataSource.entity.CourseStudent;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -22,11 +25,13 @@ public class CourseController {
     private final CourseInfoRepository courseInfoRepository;
     private final CourseRegularGradeEventRepository courseRegularGradeEventRepository;
     private final CourseStudentRepository courseStudentRepository;
+    private final CourseRegularGradeRecordRepository courseRegularGradeRecordRepository;
 
-    public CourseController(CourseInfoRepository courseInfoRepository, CourseRegularGradeEventRepository courseRegularGradeEventRepository, CourseStudentRepository courseStudentRepository) {
+    public CourseController(CourseInfoRepository courseInfoRepository, CourseRegularGradeEventRepository courseRegularGradeEventRepository, CourseStudentRepository courseStudentRepository, CourseRegularGradeRecordRepository courseRegularGradeRecordRepository) {
         this.courseInfoRepository = courseInfoRepository;
         this.courseRegularGradeEventRepository = courseRegularGradeEventRepository;
         this.courseStudentRepository = courseStudentRepository;
+        this.courseRegularGradeRecordRepository = courseRegularGradeRecordRepository;
     }
 
     @RequestMapping("/list")
@@ -108,7 +113,27 @@ public class CourseController {
         ModelAndView mav = new ModelAndView("course/sub/studentList");
         List<CourseStudent> students = courseStudentRepository.findByAttachedId(courseDBId);
         mav.addObject("students", students);
+        mav.addObject("courseId", courseDBId);
         return mav;
+    }
+
+    @PostMapping("/record/{courseDBId}")
+    public String recordRegularGrade(@PathVariable long courseDBId, long studentId,
+                                     String eventName, long score) {
+        CourseRegularGradeRecord newRecord = new CourseRegularGradeRecord();
+        newRecord.setAttachedId(courseDBId);
+        newRecord.setStudentId(studentId);
+        newRecord.setEventName(eventName);
+        newRecord.setScore(score);
+        courseRegularGradeRecordRepository.save(newRecord);
+        return "redirect:/course/" + courseDBId + "/studentList";
+    }
+
+    @RequestMapping("/{courseDBId}/getScore/{studentId}")
+    public @ResponseBody
+    List<CourseRegularGradeRecord> getScore(@PathVariable long courseDBId,
+                                            @PathVariable long studentId) {
+        return courseRegularGradeRecordRepository.findByAttachedIdAndStudentId(courseDBId, studentId);
     }
 
     @RequestMapping("/{courseDBId}/announcement")
