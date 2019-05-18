@@ -10,7 +10,7 @@ public class CourseInfo {
     private String courseId;
     private String courseName;
     private int year;
-    private int semester;
+    private int semester; //0 秋季;1 冬季;2 春季;3 夏季
 
     private String teacherId;
 

@@ -1,16 +1,17 @@
 package cn.edu.shu.pourfgt.controller;
 
-import cn.edu.shu.pourfgt.dataSource.dao.CourseGradeRepository;
 import cn.edu.shu.pourfgt.dataSource.dao.CourseInfoRepository;
+import cn.edu.shu.pourfgt.dataSource.dao.CourseRegularGradeEventRepository;
 import cn.edu.shu.pourfgt.dataSource.dao.CourseStudentRepository;
-import cn.edu.shu.pourfgt.dataSource.entity.CourseGrade;
 import cn.edu.shu.pourfgt.dataSource.entity.CourseInfo;
+import cn.edu.shu.pourfgt.dataSource.entity.CourseRegularGradeEvent;
 import cn.edu.shu.pourfgt.dataSource.entity.CourseStudent;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +20,23 @@ import java.util.List;
 @RequestMapping("/course")
 public class CourseController {
     private final CourseInfoRepository courseInfoRepository;
-    private final CourseGradeRepository courseGradeRepository;
+    private final CourseRegularGradeEventRepository courseRegularGradeEventRepository;
     private final CourseStudentRepository courseStudentRepository;
 
-    public CourseController(CourseInfoRepository courseInfoRepository, CourseGradeRepository courseGradeRepository, CourseStudentRepository courseStudentRepository) {
+    public CourseController(CourseInfoRepository courseInfoRepository, CourseRegularGradeEventRepository courseRegularGradeEventRepository, CourseStudentRepository courseStudentRepository) {
         this.courseInfoRepository = courseInfoRepository;
-        this.courseGradeRepository = courseGradeRepository;
+        this.courseRegularGradeEventRepository = courseRegularGradeEventRepository;
         this.courseStudentRepository = courseStudentRepository;
     }
 
     @RequestMapping("/list")
-    public String courseList() {
-        return "course/list";
+    public ModelAndView courseList() {
+        ModelAndView mav = new ModelAndView("course/list");
+        List<CourseInfo> courseInfos = courseInfoRepository.findByTeacherId("00000000");
+        mav.addObject("currYear", 2018);
+        mav.addObject("currSemester", 0);
+        mav.addObject("courses", courseInfos);
+        return mav;
     }
 
     @RequestMapping("/create")
@@ -38,15 +44,6 @@ public class CourseController {
         return "course/create";
     }
 
-    @RequestMapping("/{courseId}")
-    public String courseNav(@PathVariable String courseId) {
-        return "redirect:/course/{courseId}/studentList";
-    }
-
-    @RequestMapping("/{courseId}/studentList")
-    public String studentList(@PathVariable String courseId) {
-        return "course/sub/studentList";
-    }
 
     @PostMapping("/createCourse")
     public String createCourse(String courseId, String courseName, Integer[] courseType,
@@ -83,51 +80,59 @@ public class CourseController {
         testCourseStudent.add(new String[]{"18120002", "李四"});
         testCourseStudent.add(new String[]{"18120003", "王五"});
         for (String[] strings : testCourseStudent) {
-            CourseStudent courseStudent = new CourseStudent();
-            courseStudent.setStudentId(Long.valueOf(strings[0]));
-            courseStudent.setAttachedId(id);
-            courseStudent.setScore(-1);
-            courseStudentRepository.save(courseStudent);
+            CourseStudent newStudent = new CourseStudent();
+            newStudent.setStudentId(Long.valueOf(strings[0]));
+            newStudent.setAttachedId(id);
+            newStudent.setStudentName(strings[1]);
+            courseStudentRepository.save(newStudent);
         }
 
         for (int i = 0; i < name.length; i++) {
-            CourseGrade newGrade = new CourseGrade();
+            CourseRegularGradeEvent newGrade = new CourseRegularGradeEvent();
             newGrade.setAttachedId(id);
             newGrade.setName(name[i]);
             newGrade.setRatio(ratio[i]);
             newGrade.setCourseId(courseId);
-            courseGradeRepository.save(newGrade);
+            courseRegularGradeEventRepository.save(newGrade);
         }
         return "redirect:/course/" + id + "/studentList";
     }
 
-    @RequestMapping("/{courseId}/record")
-    public String record(@PathVariable String courseId) {
-        return "course/sub/record";
+    @RequestMapping("/{courseDBId}")
+    public String courseNav(@PathVariable long courseDBId) {
+        return "redirect:/course/" + courseDBId + "/studentList";
     }
 
-    @RequestMapping("/{courseId}/announcement")
-    public String announcement(@PathVariable String courseId) {
+    @RequestMapping("/{courseDBId}/studentList")
+    public ModelAndView studentList(@PathVariable long courseDBId) {
+        ModelAndView mav = new ModelAndView("course/sub/studentList");
+        List<CourseStudent> students = courseStudentRepository.findByAttachedId(courseDBId);
+        mav.addObject("students", students);
+        return mav;
+    }
+
+    @RequestMapping("/{courseDBId}/announcement")
+    public String announcement(@PathVariable long courseDBId) {
         return "";
     }
 
-    @RequestMapping("/{courseId}/homework")
-    public String homework(@PathVariable String courseId) {
+    @RequestMapping("/{courseDBId}/homework")
+    public String homework(@PathVariable long courseDBId) {
         return "";
     }
 
-    @RequestMapping("/{courseId}/problem")
-    public String problem(@PathVariable String courseId) {
+    @RequestMapping("/{courseDBId}/problem")
+    public String problem(@PathVariable long courseDBId) {
         return "";
     }
 
-    @RequestMapping("/{courseId}/discussion")
-    public String discussion(@PathVariable String courseId) {
+    @RequestMapping("/{courseDBId}/discussion")
+    public String discussion(@PathVariable long courseDBId) {
         return "";
     }
 
-    @RequestMapping("/{courseId}/weight")
-    public String weight(@PathVariable String courseId) {
+    @RequestMapping("/{courseDBId}/weight")
+    public String weight(@PathVariable long courseDBId) {
         return "";
     }
 }

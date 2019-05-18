@@ -50,7 +50,18 @@
             </li>
         </ul>
     </div>
+    <ul class="nav navbar-top-links navbar-right">
 
+        <li class="dropdown ark-TODO">
+            <a class="dropdown-toggle"
+               data-toggle="dropdown" href="#">
+                <i class="fa fa-tasks fa-fw"></i>
+                <i class="fa fa-caret-down"></i>
+            </a>
+        </li>
+
+
+    </ul>
 </nav>
 
 <div class="container" style="margin-top: 15px">
@@ -124,41 +135,19 @@
                     <tr>
                         <td>学号</td>
                         <td>姓名</td>
-                        <td>平时作业</td>
-                        <td>研讨</td>
-                        <td>平时成绩</td>
-                        <td>期末成绩</td>
-                        <td>总成绩</td>
+                        <td>操作</td>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td>18120001</td>
-                        <td>张三</td>
-                        <td>85</td>
-                        <td>95</td>
-                        <td>90</td>
-                        <td>80</td>
-                        <td>84</td>
-                    </tr>
-                    <tr>
-                        <td>18120002</td>
-                        <td>李四</td>
-                        <td>85</td>
-                        <td>95</td>
-                        <td>90</td>
-                        <td>80</td>
-                        <td>84</td>
-                    </tr>
-                    <tr>
-                        <td>18120005</td>
-                        <td>王五</td>
-                        <td>85</td>
-                        <td>95</td>
-                        <td>90</td>
-                        <td>80</td>
-                        <td>84</td>
-                    </tr>
+                    <#list students as student>
+                        <tr>
+                            <td>${student.studentId}</td>
+                            <td>${student.studentName}</td>
+                            <td>
+                                <button class="btn btn-primary">查看/修改成绩</button>
+                            </td>
+                        </tr>
+                    </#list>
                     </tbody>
                 </table>
             </div>

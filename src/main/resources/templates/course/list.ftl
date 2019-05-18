@@ -119,20 +119,26 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td>0083XXXX</td>
-                        <td><a>数据结构2</a></td>
-                        <td>2018-2019</td>
-                        <td>春季</td>
-                        <td href="/course/coursename">激活</td>
-                    </tr>
-                    <tr>
-                        <td>0083XXXX</td>
-                        <td><a>数据结构1</a></td>
-                        <td>2018-2019</td>
-                        <td>冬季</td>
-                        <td>已结束</td>
-                    </tr>
+                    <#assign semesters=["秋季","冬季","春季","夏季"]>
+                    <#list courses as course>
+                        <#if course.year==currYear &&course.semester==currSemester>
+                            <tr>
+                                <td>${course.courseId}</td>
+                                <td><a href="/course/${course.id}">${course.courseName}</a></td>
+                                <td>${course.year}-${course.year+1}</td>
+                                <td>${semesters[course.semester]}</td>
+                                <td>激活</td>
+                            </tr>
+                        <#else >
+                            <tr>
+                                <td>${course.courseId}</td>
+                                <td>${course.courseName}</td>
+                                <td>${course.year}-${course.year+1}</td>
+                                <td>${semesters[course.semester]}</td>
+                                <td>已完成</td>
+                            </tr>
+                        </#if>
+                    </#list>
                     </tbody>
                 </table>
             </div>

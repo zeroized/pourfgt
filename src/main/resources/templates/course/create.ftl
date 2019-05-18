@@ -24,23 +24,22 @@
 
         this.remove();
 
-        var formGroup = "<div class=\"form-group\">\n" +
-            "                        <label class=\"col-md-1 col-md-offset-1 control-label\">项目：</label>\n" +
-            "                        <div class=\"col-md-2\">\n" +
-            "                            <input type=\"text\" class=\"form-control\"\n" +
-            "                                   name=\"name\">\n" +
-            "                        </div>\n" +
-            "                        <label class=\"col-md-1 control-label\">比例：</label>\n" +
-            "                        <div class=\"col-md-2\">\n" +
-            "                            <input type=\"text\" class=\"form-control\"\n" +
-            "                                   name=\"ratio\">\n" +
-            "                        </div>\n" +
-            "                        <div class=\"col-md-1\">\n" +
-            "                            <a href=\"javascript:;\" class=\"addCourseGradeGroup\">\n" +
-            "                                <span class=\"glyphicon glyphicon-plus\"></span>\n" +
-            "                            </a>\n" +
-            "                        </div>\n" +
-            "                    </div>";
+        var formGroup =
+            "<div class=\"form-group\">\n" +
+            "   <label class=\"col-md-1 col-md-offset-2 control-label\">项目：</label>\n" +
+            "   <div class=\"col-md-2\">\n" +
+            "       <input type=\"text\" class=\"form-control\" name=\"name\">\n" +
+            "   </div>\n" +
+            "   <label class=\"col-md-1 control-label\">比例：</label>\n" +
+            "   <div class=\"col-md-2\">\n" +
+            "       <input type=\"text\" class=\"form-control\" name=\"ratio\">\n" +
+            "   </div>\n" +
+            "   <div class=\"col-md-1\">\n" +
+            "       <a href=\"javascript:;\" class=\"addCourseGradeGroup\">\n" +
+            "           <span class=\"glyphicon glyphicon-plus\"></span>\n" +
+            "       </a>\n" +
+            "   </div>\n" +
+            "</div>";
 
         $("#courseGradeGroup").append(formGroup);
     });
@@ -85,6 +84,18 @@
             </li>
         </ul>
     </div>
+    <ul class="nav navbar-top-links navbar-right">
+
+        <li class="dropdown ark-TODO">
+            <a class="dropdown-toggle"
+               data-toggle="dropdown" href="#">
+                <i class="fa fa-tasks fa-fw"></i>
+                <i class="fa fa-caret-down"></i>
+            </a>
+        </li>
+
+
+    </ul>
 </nav>
 
 <div class="container" style="margin-top: 15px">
@@ -130,16 +141,16 @@
                 <form class="form-horizontal"
                       action="/course/createCourse" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label for="course-number" class="col-md-3 control-label">课程号：</label>
+                        <label for="courseId" class="col-md-3 control-label">课程号：</label>
                         <div class="col-md-7">
-                            <input type="text" class="form-control" id="attachedId"
-                                   name="attachedId" placeholder="请输入课程号">
+                            <input type="text" class="form-control" id="courseId"
+                                   name="courseId" placeholder="请输入课程号">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="course-name" class="col-md-3 control-label">课程名：</label>
+                        <label for="courseName" class="col-md-3 control-label">课程名：</label>
                         <div class="col-md-7">
-                            <input type="text" class="form-control" id="course-name"
+                            <input type="text" class="form-control" id="courseName"
                                    name="courseName" placeholder="请输入课程名">
                         </div>
                     </div>

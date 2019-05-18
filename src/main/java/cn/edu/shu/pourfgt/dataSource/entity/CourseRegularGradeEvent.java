@@ -6,7 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class CourseGrade {
+public class CourseRegularGradeEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;

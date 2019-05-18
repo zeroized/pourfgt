@@ -12,7 +12,7 @@ public class CourseStudent {
     private long id;
     private long attachedId;
     private long studentId;
-    private double score;
+    private String studentName;
 
     public long getId() {
         return id;
@@ -38,11 +38,11 @@ public class CourseStudent {
         this.studentId = studentId;
     }
 
-    public double getScore() {
-        return score;
+    public String getStudentName() {
+        return studentName;
     }
 
-    public void setScore(double score) {
-        this.score = score;
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
     }
 }
