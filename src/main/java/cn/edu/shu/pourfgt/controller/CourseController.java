@@ -1,37 +1,55 @@
 package cn.edu.shu.pourfgt.controller;
 
-import cn.edu.shu.pourfgt.dataSource.dao.CourseInfoRepository;
-import cn.edu.shu.pourfgt.dataSource.dao.CourseRegularGradeEventRepository;
-import cn.edu.shu.pourfgt.dataSource.dao.CourseRegularGradeRecordRepository;
-import cn.edu.shu.pourfgt.dataSource.dao.CourseStudentRepository;
-import cn.edu.shu.pourfgt.dataSource.entity.CourseInfo;
-import cn.edu.shu.pourfgt.dataSource.entity.CourseRegularGradeEvent;
-import cn.edu.shu.pourfgt.dataSource.entity.CourseRegularGradeRecord;
-import cn.edu.shu.pourfgt.dataSource.entity.CourseStudent;
+import cn.edu.shu.pourfgt.dataSource.dao.*;
+import cn.edu.shu.pourfgt.dataSource.entity.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.format.datetime.DateFormatter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Controller
 @RequestMapping("/course")
 public class CourseController {
+    private final String announceFileDir;
+
     private final CourseInfoRepository courseInfoRepository;
     private final CourseRegularGradeEventRepository courseRegularGradeEventRepository;
     private final CourseStudentRepository courseStudentRepository;
     private final CourseRegularGradeRecordRepository courseRegularGradeRecordRepository;
+    private final CourseAnnouncementRepository courseAnnouncementRepository;
 
-    public CourseController(CourseInfoRepository courseInfoRepository, CourseRegularGradeEventRepository courseRegularGradeEventRepository, CourseStudentRepository courseStudentRepository, CourseRegularGradeRecordRepository courseRegularGradeRecordRepository) {
+    public CourseController(@Value("${course.announcement.file-path}") String announceFileDir,
+                            CourseInfoRepository courseInfoRepository,
+                            CourseRegularGradeEventRepository courseRegularGradeEventRepository,
+                            CourseStudentRepository courseStudentRepository,
+                            CourseRegularGradeRecordRepository courseRegularGradeRecordRepository, CourseAnnouncementRepository courseAnnouncementRepository) {
+        this.announceFileDir = announceFileDir;
         this.courseInfoRepository = courseInfoRepository;
         this.courseRegularGradeEventRepository = courseRegularGradeEventRepository;
         this.courseStudentRepository = courseStudentRepository;
         this.courseRegularGradeRecordRepository = courseRegularGradeRecordRepository;
+        this.courseAnnouncementRepository = courseAnnouncementRepository;
+    }
+
+    @InitBinder
+    public void initDate(WebDataBinder webDataBinder) {
+        webDataBinder.addCustomFormatter(new DateFormatter("yyyy-MM-dd"));
     }
 
     @RequestMapping("/list")
@@ -120,6 +138,7 @@ public class CourseController {
     @PostMapping("/record/{courseDBId}")
     public String recordRegularGrade(@PathVariable long courseDBId, long studentId,
                                      String eventName, long score) {
+        //TODO add checking the group discussion score
         CourseRegularGradeRecord newRecord = new CourseRegularGradeRecord();
         newRecord.setAttachedId(courseDBId);
         newRecord.setStudentId(studentId);
@@ -133,12 +152,70 @@ public class CourseController {
     public @ResponseBody
     List<CourseRegularGradeRecord> getScore(@PathVariable long courseDBId,
                                             @PathVariable long studentId) {
-        return courseRegularGradeRecordRepository.findByAttachedIdAndStudentId(courseDBId, studentId);
+        return courseRegularGradeRecordRepository
+                .findByAttachedIdAndStudentId(courseDBId, studentId);
     }
 
     @RequestMapping("/{courseDBId}/announcement")
-    public String announcement(@PathVariable long courseDBId) {
-        return "";
+    public ModelAndView announcement(@PathVariable long courseDBId) {
+        ModelAndView mav = new ModelAndView("course/sub/announcement");
+        List<CourseAnnouncement> announcements = courseAnnouncementRepository.findByAttachedId(courseDBId);
+        mav.addObject("announcements", announcements);
+        mav.addObject("courseId", courseDBId);
+        return mav;
+    }
+
+    @PostMapping("/announce/{courseDBId}")
+    public String publishAnnouncement(@PathVariable long courseDBId, String title,
+                                      String content, int type,
+                                      @RequestParam(required = false) MultipartFile file,
+                                      @RequestParam(required = false) Date deadline)
+            throws IOException {
+        CourseAnnouncement newAnnouncement = new CourseAnnouncement();
+        newAnnouncement.setAttachedId(courseDBId);
+        long currentTime = new Date().getTime();
+        newAnnouncement.setCreateTime(currentTime);
+        newAnnouncement.setTitle(title);
+        newAnnouncement.setContent(content);
+        newAnnouncement.setType(type);
+        if (file != null) {
+            String localFilePath = announceFileDir + courseDBId + "_" + currentTime + "_" + file.getOriginalFilename();
+            File localFile = new File(localFilePath);
+            file.transferTo(localFile);
+            newAnnouncement.setHasFile(true);
+            newAnnouncement.setFilePath(localFilePath);
+        } else {
+            newAnnouncement.setHasFile(false);
+            newAnnouncement.setFilePath("");
+        }
+        if (deadline != null) {
+            newAnnouncement.setHasDeadline(true);
+            newAnnouncement.setDeadline(deadline.getTime());
+        } else {
+            newAnnouncement.setHasDeadline(false);
+            newAnnouncement.setDeadline(-1);
+        }
+        courseAnnouncementRepository.save(newAnnouncement);
+        return "redirect:/course/" + courseDBId + "/announcement";
+    }
+
+    @RequestMapping("/getAnnouncement/{announcementId}")
+    public @ResponseBody
+    CourseAnnouncement getAnnouncement(@PathVariable long announcementId) {
+        return courseAnnouncementRepository.findById(announcementId);
+    }
+
+    @RequestMapping("/getAnnouncementFile/{announcementId}")
+    public ResponseEntity<InputStreamResource> getAnnouncementFile(@PathVariable long announcementId) throws FileNotFoundException {
+        String localFilePath = courseAnnouncementRepository.findById(announcementId).getFilePath();
+        String fileName = Paths.get(localFilePath).getFileName().toString();
+        File file = new File(localFilePath);
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .contentLength(file.length())
+                .body(resource);
     }
 
     @RequestMapping("/{courseDBId}/homework")
