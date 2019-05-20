@@ -169,7 +169,7 @@ public class CourseController {
     public String publishAnnouncement(@PathVariable long courseDBId, String title,
                                       String content, int type,
                                       @RequestParam(required = false) MultipartFile file,
-                                      @RequestParam(required = false) Date deadline)
+                                      @RequestParam(required = false) Integer deadline)
             throws IOException {
         CourseAnnouncement newAnnouncement = new CourseAnnouncement();
         newAnnouncement.setAttachedId(courseDBId);
@@ -190,7 +190,7 @@ public class CourseController {
         }
         if (deadline != null) {
             newAnnouncement.setHasDeadline(true);
-            newAnnouncement.setDeadline(deadline.getTime());
+            newAnnouncement.setDeadline(deadline);
         } else {
             newAnnouncement.setHasDeadline(false);
             newAnnouncement.setDeadline(-1);

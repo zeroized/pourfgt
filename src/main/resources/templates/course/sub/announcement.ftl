@@ -156,10 +156,14 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="deadline" class="control-label col-md-3">截止日期</label>
-                        <div class="col-md-7">
-                            <input type="date" class="form-control"
-                                   name="deadline" id="deadline">
+                        <label for="deadline" class="control-label col-md-3">截止周次</label>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-addon">第</span>
+                                <input type="text" class="form-control"
+                                       name="deadline" id="deadline">
+                                <span class="input-group-addon">周</span>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
