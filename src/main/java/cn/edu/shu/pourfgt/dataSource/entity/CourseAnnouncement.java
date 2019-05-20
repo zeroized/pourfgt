@@ -18,6 +18,7 @@ public class CourseAnnouncement {
     private String filePath = "";
 
     private boolean hasDeadline;
+    private int week = -1;
     private int deadline = -1;//周次
 
     public long getId() {
@@ -90,6 +91,14 @@ public class CourseAnnouncement {
 
     public void setHasDeadline(boolean hasDeadline) {
         this.hasDeadline = hasDeadline;
+    }
+
+    public int getWeek() {
+        return week;
+    }
+
+    public void setWeek(int week) {
+        this.week = week;
     }
 
     public int getDeadline() {

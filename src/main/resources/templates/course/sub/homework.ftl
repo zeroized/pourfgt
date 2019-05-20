@@ -89,7 +89,7 @@
             <li><a href="/course/${courseId}">数据结构2</a></li>
         </ol>
         <ul class="nav nav-pills" style="margin-top: 15px">
-            <li role="presentation" class="active">
+            <li role="presentation">
                 <a href="/course/${courseId}/studentList">
                     学生名单
                 </a>
@@ -99,7 +99,7 @@
                     发布
                 </a>
             </li>
-            <li role="presentation">
+            <li role="presentation" class="active">
                 <a href="/course/${courseId}/homework">
                     平时作业
                 </a>
@@ -121,26 +121,41 @@
             </li>
         </ul>
         <div class="panel panel-default" style="margin-top: 15px">
-            <div class="panel-heading">学生名单</div>
+            <div class="panel-heading">平时作业</div>
             <div class="panel-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-md-2">周次</label>
+                        <div class="col-md-5">
+                            <select class="form-control">
+                                <option></option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit">查看</button>
+                        </div>
+                    </div>
+                </form>
                 <table class="table table-hover">
                     <thead>
                     <tr>
                         <td>学号</td>
-                        <td>姓名</td>
+                        <td>提交时间</td>
+                        <td>是否逾期</td>
                         <td>操作</td>
                     </tr>
                     </thead>
                     <tbody>
-                    <#list students as student>
+                    <#list homeworkList as homework>
                         <tr>
-                            <td>${student.studentId}</td>
-                            <td>${student.studentName}</td>
+                            <td>${homework.studentId}</td>
+                            <td>${homework.createTime}</td>
+                            <td>${homework.overdue}</td>
                             <td>
                                 <button class="btn btn-primary"
-                                        data-toggle="modal" data-target="#scoreDetail"
-                                        data-student="${student.studentId}"
-                                >查看成绩/提交成绩
+                                        data-toggle="modal" data-target="#homeworkDetail"
+                                        data-id="${homework.id}"
+                                >批改作业
                                 </button>
                             </td>
                         </tr>
@@ -152,53 +167,15 @@
     </div>
 </div>
 <!-- Modal -->
-<div class="modal fade" id="scoreDetail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="homeworkDetail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="myModalLabel">成绩详情</h4>
+                <h4 class="modal-title" id="myModalLabel">作业详情</h4>
             </div>
             <div class="modal-body">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <td>项目名</td>
-                        <td>得分</td>
-                    </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
-
-                <form class="form-horizontal" action="/course/record/${courseId}" method="post">
-                    <input type="hidden" name="studentId" id="studentIdInput">
-                    <div class="form-group">
-                        <label for="eventName" class="col-md-2 control-label">项目名</label>
-                        <div class="col-md-6">
-                            <select id="eventName" class="form-control" name="eventName">
-                                <option value="出勤">出勤</option>
-                                <option value="上机">上机</option>
-                                <option value="研讨">研讨</option>
-                                <option value="期末">期末</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="score" class="col-md-2 control-label">得分</label>
-                        <div class="col-md-6">
-                            <input id="score" type="text" class="form-control" name="score">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-2 col-md-offset-3">
-                            <button type="submit" class="btn btn-primary">提交成绩</button>
-                        </div>
-                    </div>
-                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -207,23 +184,38 @@
     </div>
 </div>
 <script>
-    $('#scoreDetail').on('show.bs.modal', function (event) {
+    $('#announcementDetail').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
-        var studentId = button.data("student");
-        // var courseId=button.data("queryCourse");
+        var id = button.data("id");
         //TODO adding ajax query here
-        $.getJSON("/course/${courseId}/getScore/" + studentId, function (data) {
-            data.forEach(function (datum) {
-                modal.find('tbody').append("" +
-                    "<tr>" +
-                    "   <td>" + datum.eventName + "</td>" +
-                    "   <td>" + datum.score + "</td>" +
-                    "</tr>")
-            })
+        $.getJSON("/course/getHomework/" + id, function (data) {
+            var body = modal.find('.modal-body');
+            // var types = ["信息", "资料", "作业"];
+            // body.append("<h4>标题</h4>" +
+            //     "<p>" + data.title + "</p>");
+            // body.append("<h4>内容</h4>" +
+            //     "<p>" + data.content + "</p>");
+            // var createTime = new Date();
+            // createTime.setTime(data.createTime);
+            // body.append("<h4>发布时间</h4>" +
+            //     "<p>" + createTime + "</p>");
+            // body.append("<h4>信息类型</h4>" +
+            //     "<p>" + types[data.type] + "</p>");
+            // if (data.hasFile) {
+            //     body.append("<h4>附件</h4>" +
+            //         "<a href=\"/course/getAnnouncementFile/" + id + "\">下载</a>");
+            // }
+            // if (data.hasDeadline) {
+            //     var deadline = new Date();
+            //     deadline.setTime(data.deadline);
+            //     body.append("<h4>截止日期</h4>" +
+            //         "<p>" + deadline + "</p>")
+            // }
+
         });
         var modal = $(this);
-        modal.find('.modal-title').text(studentId + "成绩详细");
-        modal.find('#studentIdInput').val(studentId);
+        // modal.find('.modal-title').text(studentId + "成绩详细");
+        // modal.find('#studentIdInput').val(studentId);
     });
 </script>
 </body>

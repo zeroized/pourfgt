@@ -4,6 +4,7 @@ import cn.edu.shu.pourfgt.dataSource.dao.*;
 import cn.edu.shu.pourfgt.dataSource.entity.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.datetime.DateFormatter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,24 +28,29 @@ import java.util.List;
 @RequestMapping("/course")
 public class CourseController {
     private final String announceFileDir;
+    private final CourseStudentMessageRepository courseStudentMessageRepository;
 
     private final CourseInfoRepository courseInfoRepository;
     private final CourseRegularGradeEventRepository courseRegularGradeEventRepository;
     private final CourseStudentRepository courseStudentRepository;
     private final CourseRegularGradeRecordRepository courseRegularGradeRecordRepository;
     private final CourseAnnouncementRepository courseAnnouncementRepository;
+    @Value("${course.semester.start-day}")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date startDay;
 
     public CourseController(@Value("${course.announcement.file-path}") String announceFileDir,
                             CourseInfoRepository courseInfoRepository,
                             CourseRegularGradeEventRepository courseRegularGradeEventRepository,
                             CourseStudentRepository courseStudentRepository,
-                            CourseRegularGradeRecordRepository courseRegularGradeRecordRepository, CourseAnnouncementRepository courseAnnouncementRepository) {
+                            CourseRegularGradeRecordRepository courseRegularGradeRecordRepository, CourseAnnouncementRepository courseAnnouncementRepository, CourseStudentMessageRepository courseStudentMessageRepository) {
         this.announceFileDir = announceFileDir;
         this.courseInfoRepository = courseInfoRepository;
         this.courseRegularGradeEventRepository = courseRegularGradeEventRepository;
         this.courseStudentRepository = courseStudentRepository;
         this.courseRegularGradeRecordRepository = courseRegularGradeRecordRepository;
         this.courseAnnouncementRepository = courseAnnouncementRepository;
+        this.courseStudentMessageRepository = courseStudentMessageRepository;
     }
 
     @InitBinder
@@ -168,6 +174,7 @@ public class CourseController {
     @PostMapping("/announce/{courseDBId}")
     public String publishAnnouncement(@PathVariable long courseDBId, String title,
                                       String content, int type,
+                                      @RequestParam(required = false) int week,
                                       @RequestParam(required = false) MultipartFile file,
                                       @RequestParam(required = false) Integer deadline)
             throws IOException {
@@ -191,23 +198,25 @@ public class CourseController {
         if (deadline != null) {
             newAnnouncement.setHasDeadline(true);
             newAnnouncement.setDeadline(deadline);
+            newAnnouncement.setWeek(week);
         } else {
             newAnnouncement.setHasDeadline(false);
             newAnnouncement.setDeadline(-1);
+            newAnnouncement.setWeek(-1);
         }
         courseAnnouncementRepository.save(newAnnouncement);
         return "redirect:/course/" + courseDBId + "/announcement";
     }
 
-    @RequestMapping("/getAnnouncement/{announcementId}")
+    @RequestMapping("/getAnnouncement")
     public @ResponseBody
-    CourseAnnouncement getAnnouncement(@PathVariable long announcementId) {
-        return courseAnnouncementRepository.findById(announcementId);
+    CourseAnnouncement getAnnouncement(long id) {
+        return courseAnnouncementRepository.findById(id);
     }
 
-    @RequestMapping("/getAnnouncementFile/{announcementId}")
-    public ResponseEntity<InputStreamResource> getAnnouncementFile(@PathVariable long announcementId) throws FileNotFoundException {
-        String localFilePath = courseAnnouncementRepository.findById(announcementId).getFilePath();
+    @RequestMapping("/getAnnouncementFile")
+    public ResponseEntity<InputStreamResource> getAnnouncementFile(long id) throws FileNotFoundException {
+        String localFilePath = courseAnnouncementRepository.findById(id).getFilePath();
         String fileName = Paths.get(localFilePath).getFileName().toString();
         File file = new File(localFilePath);
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
@@ -219,13 +228,35 @@ public class CourseController {
     }
 
     @RequestMapping("/{courseDBId}/homework")
-    public String homework(@PathVariable long courseDBId) {
-        return "";
+    public ModelAndView homework(@PathVariable long courseDBId,
+                                 @RequestParam(defaultValue = "1") int week) {
+        ModelAndView mav = new ModelAndView("course/sub/homework");
+        mav.addObject("courseId", courseDBId);
+        List<CourseStudentMessage> messages = courseStudentMessageRepository
+                .findByAttachedIdAndTypeAndHomeworkWeek(courseDBId, 0, week);
+        mav.addObject("homeworkList", messages);
+        return mav;
     }
 
-    @RequestMapping("/{courseDBId}/problem")
-    public String problem(@PathVariable long courseDBId) {
-        return "";
+    @GetMapping("/getHomework")
+    public @ResponseBody
+    CourseStudentMessage getHomework(long id) {
+        return courseStudentMessageRepository.findById(id);
+    }
+
+    @RequestMapping("/{courseDBId}/question")
+    public ModelAndView question(@PathVariable long courseDBId) {
+        ModelAndView mav = new ModelAndView("course/sub/question");
+        mav.addObject("courseId", courseDBId);
+        List<CourseStudentMessage> questions = courseStudentMessageRepository.findByAttachedIdAndType(courseDBId, 1);
+        mav.addObject("questions", questions);
+        return mav;
+    }
+
+    @GetMapping("/getQuestion")
+    public @ResponseBody
+    CourseStudentMessage getQuestion(long id) {
+        return courseStudentMessageRepository.findById(id);
     }
 
     @RequestMapping("/{courseDBId}/discussion")

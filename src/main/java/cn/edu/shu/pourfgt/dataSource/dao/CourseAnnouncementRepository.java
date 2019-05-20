@@ -8,5 +8,7 @@ import java.util.List;
 public interface CourseAnnouncementRepository extends CrudRepository<CourseAnnouncement, Long> {
     List<CourseAnnouncement> findByAttachedId(long attachedId);
 
+    List<CourseAnnouncement> findByTypeAndWeek(int type, int week);
+
     CourseAnnouncement findById(long id);
 }

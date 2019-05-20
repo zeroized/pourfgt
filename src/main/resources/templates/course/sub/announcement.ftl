@@ -76,7 +76,7 @@
                 </a>
             </li>
             <li role="presentation">
-                <a href="/postgraduate" role="tab" data-toggle="tab">
+                <a href="/postgraduate">
                     <span class="glyphicon glyphicon-home"></span>&nbsp; 研究生日常管理
                 </a>
             </li>
@@ -111,7 +111,7 @@
             </li>
             <li role="presentation">
                 <a href="/course/${courseId}/discussion">
-                    发布研讨
+                    研讨管理
                 </a>
             </li>
             <li role="presentation">
@@ -153,6 +153,17 @@
                         <label for="file" class="control-label col-md-3">附件</label>
                         <div class="col-md-7">
                             <input type="file" name="file" id="file">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="week" class="control-label col-md-3">周次</label>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-addon">第</span>
+                                <input type="text" class="form-control"
+                                       name="week" id="week">
+                                <span class="input-group-addon">周</span>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -223,7 +234,7 @@
         var id = button.data("id");
         // var courseId=button.data("queryCourse");
         //TODO adding ajax query here
-        $.getJSON("/course/getAnnouncement/" + id, function (data) {
+        $.getJSON("/course/getAnnouncement?id=" + id, function (data) {
             var body = modal.find('.modal-body');
             var types = ["信息", "资料", "作业"];
             body.append("<h4>标题</h4>" +
@@ -238,7 +249,7 @@
                 "<p>" + types[data.type] + "</p>");
             if (data.hasFile) {
                 body.append("<h4>附件</h4>" +
-                    "<a href=\"/course/getAnnouncementFile/" + id + "\">下载</a>");
+                    "<a href=\"/course/getAnnouncementFile?id=" + id + "\">下载</a>");
             }
             if (data.hasDeadline) {
                 var deadline = new Date();
