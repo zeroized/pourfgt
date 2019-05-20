@@ -4,7 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class CourseAnnouncement {
+public class CoursePost {
     @Id
     private long id;
     private long attachedId;
@@ -13,7 +13,7 @@ public class CourseAnnouncement {
     private String title;
     private String content;
 
-    private int type;//0 通知;1 资料;2 作业
+    private int type;//0 通知;1 资料;2 作业;3 研讨
     private boolean hasFile;
     private String filePath = "";
 

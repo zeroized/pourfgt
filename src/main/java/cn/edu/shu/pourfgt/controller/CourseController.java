@@ -34,7 +34,7 @@ public class CourseController {
     private final CourseRegularGradeEventRepository courseRegularGradeEventRepository;
     private final CourseStudentRepository courseStudentRepository;
     private final CourseRegularGradeRecordRepository courseRegularGradeRecordRepository;
-    private final CourseAnnouncementRepository courseAnnouncementRepository;
+    private final CoursePostRepository coursePostRepository;
     @Value("${course.semester.start-day}")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date startDay;
@@ -43,13 +43,13 @@ public class CourseController {
                             CourseInfoRepository courseInfoRepository,
                             CourseRegularGradeEventRepository courseRegularGradeEventRepository,
                             CourseStudentRepository courseStudentRepository,
-                            CourseRegularGradeRecordRepository courseRegularGradeRecordRepository, CourseAnnouncementRepository courseAnnouncementRepository, CourseStudentMessageRepository courseStudentMessageRepository) {
+                            CourseRegularGradeRecordRepository courseRegularGradeRecordRepository, CoursePostRepository coursePostRepository, CourseStudentMessageRepository courseStudentMessageRepository) {
         this.announceFileDir = announceFileDir;
         this.courseInfoRepository = courseInfoRepository;
         this.courseRegularGradeEventRepository = courseRegularGradeEventRepository;
         this.courseStudentRepository = courseStudentRepository;
         this.courseRegularGradeRecordRepository = courseRegularGradeRecordRepository;
-        this.courseAnnouncementRepository = courseAnnouncementRepository;
+        this.coursePostRepository = coursePostRepository;
         this.courseStudentMessageRepository = courseStudentMessageRepository;
     }
 
@@ -165,7 +165,7 @@ public class CourseController {
     @RequestMapping("/{courseDBId}/announcement")
     public ModelAndView announcement(@PathVariable long courseDBId) {
         ModelAndView mav = new ModelAndView("course/sub/announcement");
-        List<CourseAnnouncement> announcements = courseAnnouncementRepository.findByAttachedId(courseDBId);
+        List<CoursePost> announcements = coursePostRepository.findByAttachedId(courseDBId);
         mav.addObject("announcements", announcements);
         mav.addObject("courseId", courseDBId);
         return mav;
@@ -178,7 +178,7 @@ public class CourseController {
                                       @RequestParam(required = false) MultipartFile file,
                                       @RequestParam(required = false) Integer deadline)
             throws IOException {
-        CourseAnnouncement newAnnouncement = new CourseAnnouncement();
+        CoursePost newAnnouncement = new CoursePost();
         newAnnouncement.setAttachedId(courseDBId);
         long currentTime = new Date().getTime();
         newAnnouncement.setCreateTime(currentTime);
@@ -204,19 +204,19 @@ public class CourseController {
             newAnnouncement.setDeadline(-1);
             newAnnouncement.setWeek(-1);
         }
-        courseAnnouncementRepository.save(newAnnouncement);
+        coursePostRepository.save(newAnnouncement);
         return "redirect:/course/" + courseDBId + "/announcement";
     }
 
     @RequestMapping("/getAnnouncement")
     public @ResponseBody
-    CourseAnnouncement getAnnouncement(long id) {
-        return courseAnnouncementRepository.findById(id);
+    CoursePost getAnnouncement(long id) {
+        return coursePostRepository.findById(id);
     }
 
     @RequestMapping("/getAnnouncementFile")
     public ResponseEntity<InputStreamResource> getAnnouncementFile(long id) throws FileNotFoundException {
-        String localFilePath = courseAnnouncementRepository.findById(id).getFilePath();
+        String localFilePath = coursePostRepository.findById(id).getFilePath();
         String fileName = Paths.get(localFilePath).getFileName().toString();
         File file = new File(localFilePath);
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
