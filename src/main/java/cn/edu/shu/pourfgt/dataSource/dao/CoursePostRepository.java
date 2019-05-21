@@ -8,7 +8,9 @@ import java.util.List;
 public interface CoursePostRepository extends CrudRepository<CoursePost, Long> {
     List<CoursePost> findByAttachedId(long attachedId);
 
-    List<CoursePost> findByTypeAndWeek(int type, int week);
+    List<CoursePost> findByAttachedIdAndTypeAndWeek(long attachedId, int type, int week);
+
+    List<CoursePost> findByAttachedIdAndType(long attachedId, int type);
 
     CoursePost findById(long id);
 }

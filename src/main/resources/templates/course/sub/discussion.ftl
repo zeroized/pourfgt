@@ -3,6 +3,7 @@
 <head>
     <title>Shanghai UniversityRender</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入 Bootstrap -->
     <#include "../../layout/resource.ftl">
 </head>
 <body style="width:100%;height:100%;">
@@ -31,16 +32,8 @@
                                    name="content" id="content">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="type" class="control-label col-md-3">类型</label>
-                        <div class="col-md-7">
-                            <select class="form-control" name="type" id="type">
-                                <option value="0" selected>通知</option>
-                                <option value="1">资料</option>
-                                <option value="2">作业</option>
-                            </select>
-                        </div>
-                    </div>
+                    <input type="hidden" class="form-control" name="type" value="3">
+
                     <div class="form-group">
                         <label for="file" class="control-label col-md-3">附件</label>
                         <div class="col-md-7">
@@ -48,23 +41,12 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="week" class="control-label col-md-3">周次</label>
+                        <label for="week" class="control-label col-md-3">研讨周次</label>
                         <div class="col-md-3">
                             <div class="input-group">
                                 <span class="input-group-addon">第</span>
                                 <input type="text" class="form-control"
                                        name="week" id="week">
-                                <span class="input-group-addon">周</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="deadline" class="control-label col-md-3">截止周次</label>
-                        <div class="col-md-3">
-                            <div class="input-group">
-                                <span class="input-group-addon">第</span>
-                                <input type="text" class="form-control"
-                                       name="deadline" id="deadline">
                                 <span class="input-group-addon">周</span>
                             </div>
                         </div>
@@ -84,14 +66,14 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <#list announcements as announcement>
+                    <#list discussions as discussion>
                         <tr>
-                            <td>${announcement.title}</td>
-                            <td>${announcement.createTime}</td>
+                            <td>${discussion.title}</td>
+                            <td>${discussion.createTime}</td>
                             <td>
                                 <button class="btn btn-primary"
-                                        data-toggle="modal" data-target="#announcementDetail"
-                                        data-id="${announcement.id}"
+                                        data-toggle="modal" data-target="#discussionDetail"
+                                        data-id="${discussion.id}"
                                 >查看详情
                                 </button>
                             </td>
@@ -104,7 +86,7 @@
     </div>
 </div>
 <!-- Modal -->
-<div class="modal fade" id="announcementDetail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="discussionDetail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -121,12 +103,12 @@
     </div>
 </div>
 <script>
-    $('#announcementDetail').on('show.bs.modal', function (event) {
+    $('#discussionDetail').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var id = button.data("id");
         // var courseId=button.data("queryCourse");
         //TODO adding ajax query here
-        $.getJSON("/course/getAnnouncement?id=" + id, function (data) {
+        $.getJSON("/course/getPost?id=" + id, function (data) {
             var body = modal.find('.modal-body');
             var types = ["信息", "资料", "作业", "研讨"];
             body.append("<h4>标题</h4>" +

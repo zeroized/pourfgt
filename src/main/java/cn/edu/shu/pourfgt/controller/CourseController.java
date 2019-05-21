@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,9 +24,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
-@RequestMapping("/course")
+@RequestMapping("/teacher/course")
 public class CourseController {
     private final String announceFileDir;
     private final CourseStudentMessageRepository courseStudentMessageRepository;
@@ -56,6 +58,18 @@ public class CourseController {
     @InitBinder
     public void initDate(WebDataBinder webDataBinder) {
         webDataBinder.addCustomFormatter(new DateFormatter("yyyy-MM-dd"));
+    }
+
+    @ModelAttribute
+    public void addCourseInfo(@PathVariable(required = false) Long courseDBId, Model model) {
+        if (courseDBId != null) {
+            Optional<CourseInfo> courseInfoOption = courseInfoRepository.findById(courseDBId);
+            if (courseInfoOption.isPresent()) {
+                CourseInfo courseInfo = courseInfoOption.get();
+                model.addAttribute("courseId", courseInfo.getId());
+                model.addAttribute("courseName", courseInfo.getCourseName());
+            }
+        }
     }
 
     @RequestMapping("/list")
@@ -124,12 +138,12 @@ public class CourseController {
             newGrade.setCourseId(courseId);
             courseRegularGradeEventRepository.save(newGrade);
         }
-        return "redirect:/course/" + id + "/studentList";
+        return "redirect:/teacher/course/" + id + "/studentList";
     }
 
     @RequestMapping("/{courseDBId}")
     public String courseNav(@PathVariable long courseDBId) {
-        return "redirect:/course/" + courseDBId + "/studentList";
+        return "redirect:/teacher/course/" + courseDBId + "/studentList";
     }
 
     @RequestMapping("/{courseDBId}/studentList")
@@ -137,7 +151,7 @@ public class CourseController {
         ModelAndView mav = new ModelAndView("course/sub/studentList");
         List<CourseStudent> students = courseStudentRepository.findByAttachedId(courseDBId);
         mav.addObject("students", students);
-        mav.addObject("courseId", courseDBId);
+        mav.addObject("navId", 0);
         return mav;
     }
 
@@ -151,7 +165,7 @@ public class CourseController {
         newRecord.setEventName(eventName);
         newRecord.setScore(score);
         courseRegularGradeRecordRepository.save(newRecord);
-        return "redirect:/course/" + courseDBId + "/studentList";
+        return "redirect:/teacher/course/" + courseDBId + "/studentList";
     }
 
     @RequestMapping("/{courseDBId}/getScore/{studentId}")
@@ -167,12 +181,12 @@ public class CourseController {
         ModelAndView mav = new ModelAndView("course/sub/announcement");
         List<CoursePost> announcements = coursePostRepository.findByAttachedId(courseDBId);
         mav.addObject("announcements", announcements);
-        mav.addObject("courseId", courseDBId);
+        mav.addObject("navId", 1);
         return mav;
     }
 
-    @PostMapping("/announce/{courseDBId}")
-    public String publishAnnouncement(@PathVariable long courseDBId, String title,
+    @PostMapping("/post/{courseDBId}")
+    public String releasePost(@PathVariable long courseDBId, String title,
                                       String content, int type,
                                       @RequestParam(required = false) int week,
                                       @RequestParam(required = false) MultipartFile file,
@@ -205,10 +219,10 @@ public class CourseController {
             newAnnouncement.setWeek(-1);
         }
         coursePostRepository.save(newAnnouncement);
-        return "redirect:/course/" + courseDBId + "/announcement";
+        return "redirect:/teacher/course/" + courseDBId + "/announcement";
     }
 
-    @RequestMapping("/getAnnouncement")
+    @RequestMapping("/getPost")
     public @ResponseBody
     CoursePost getAnnouncement(long id) {
         return coursePostRepository.findById(id);
@@ -231,10 +245,10 @@ public class CourseController {
     public ModelAndView homework(@PathVariable long courseDBId,
                                  @RequestParam(defaultValue = "1") int week) {
         ModelAndView mav = new ModelAndView("course/sub/homework");
-        mav.addObject("courseId", courseDBId);
         List<CourseStudentMessage> messages = courseStudentMessageRepository
                 .findByAttachedIdAndTypeAndHomeworkWeek(courseDBId, 0, week);
         mav.addObject("homeworkList", messages);
+        mav.addObject("navId", 2);
         return mav;
     }
 
@@ -247,9 +261,10 @@ public class CourseController {
     @RequestMapping("/{courseDBId}/question")
     public ModelAndView question(@PathVariable long courseDBId) {
         ModelAndView mav = new ModelAndView("course/sub/question");
-        mav.addObject("courseId", courseDBId);
         List<CourseStudentMessage> questions = courseStudentMessageRepository.findByAttachedIdAndType(courseDBId, 1);
         mav.addObject("questions", questions);
+        mav.addObject("navId", 3);
+
         return mav;
     }
 
@@ -260,12 +275,26 @@ public class CourseController {
     }
 
     @RequestMapping("/{courseDBId}/discussion")
-    public String discussion(@PathVariable long courseDBId) {
-        return "";
+    public ModelAndView discussion(@PathVariable long courseDBId) {
+        ModelAndView mav = new ModelAndView("course/sub/discussion");
+        List<CoursePost> discussions = coursePostRepository.findByAttachedIdAndType(courseDBId, 3);
+        mav.addObject("discussions", discussions);
+        mav.addObject("navId", 4);
+        return mav;
     }
 
     @RequestMapping("/{courseDBId}/weight")
-    public String weight(@PathVariable long courseDBId) {
-        return "";
+    public ModelAndView weight(@PathVariable long courseDBId) {
+        ModelAndView mav = new ModelAndView("course/sub/weight");
+        List<CourseRegularGradeEvent> events = courseRegularGradeEventRepository.findByAttachedId(courseDBId);
+        mav.addObject("events", events);
+        mav.addObject("navId", 5);
+        return mav;
+    }
+
+    @PostMapping("/updateWeight/{courseDBId}")
+    public String updateWeight(@PathVariable String courseDBId,
+                               long[] id, double[] ratio) {
+        return "redirect:/teacher/course/" + courseDBId + "/weight";
     }
 }

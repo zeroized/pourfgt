@@ -6,22 +6,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/")
 public class PageController {
-    @RequestMapping
+    @RequestMapping("/")
     public String home() {
-        return "redirect:/course";
+        return "redirect:/teacher/course";
     }
 
-    @RequestMapping("course")
+    @RequestMapping("teacher/course")
     public String courseHome() {
-        return "redirect:/course/list";
+        return "redirect:/teacher/course/list";
     }
 
-    @RequestMapping("postgraduate")
+    @RequestMapping("teacher/postgraduate")
     public String postgraduateHome() {
         return "postgraduate/home";
     }
 
-    @RequestMapping("graduationDesign")
+    @RequestMapping("teacher/graduationDesign")
     public String graduationDesignHome() {
         return "graduationDesign/home";
     }
