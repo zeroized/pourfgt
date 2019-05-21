@@ -4,14 +4,14 @@
     <title>Shanghai UniversityRender</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 引入 Bootstrap -->
-    <#include "../layout/resource.ftl">
+    <#include "../../layout/resource.ftl">
 
 </head>
 <body style="width:100%;height:100%;">
-<#include "../layout/headerNav.ftl">
+<#include "../../layout/headerNav.ftl">
 
 <div class="container" style="margin-top: 15px">
-    <#include "../layout/leftNav.ftl">
+    <#include "../../layout/leftNav.ftl">
     <div class="col-md-10 col-sm-10 col-lg-10 ">
         <ol class="breadcrumb" style="margin-bottom:0">
             <li><a href="/">首页</a></li>
