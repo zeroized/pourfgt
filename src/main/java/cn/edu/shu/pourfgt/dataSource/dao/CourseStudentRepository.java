@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface CourseStudentRepository extends CrudRepository<CourseStudent, Long> {
     List<CourseStudent> findByAttachedId(long attachedId);
+
+    List<CourseStudent> findByStudentId(long studentId);
 }

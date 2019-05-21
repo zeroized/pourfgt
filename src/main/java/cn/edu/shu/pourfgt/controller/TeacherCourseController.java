@@ -28,7 +28,7 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/teacher/course")
-public class CourseController {
+public class TeacherCourseController {
     private final String announceFileDir;
     private final CourseStudentMessageRepository courseStudentMessageRepository;
 
@@ -41,11 +41,11 @@ public class CourseController {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date startDay;
 
-    public CourseController(@Value("${course.announcement.file-path}") String announceFileDir,
-                            CourseInfoRepository courseInfoRepository,
-                            CourseRegularGradeEventRepository courseRegularGradeEventRepository,
-                            CourseStudentRepository courseStudentRepository,
-                            CourseRegularGradeRecordRepository courseRegularGradeRecordRepository, CoursePostRepository coursePostRepository, CourseStudentMessageRepository courseStudentMessageRepository) {
+    public TeacherCourseController(@Value("${course.announcement.file-path}") String announceFileDir,
+                                   CourseInfoRepository courseInfoRepository,
+                                   CourseRegularGradeEventRepository courseRegularGradeEventRepository,
+                                   CourseStudentRepository courseStudentRepository,
+                                   CourseRegularGradeRecordRepository courseRegularGradeRecordRepository, CoursePostRepository coursePostRepository, CourseStudentMessageRepository courseStudentMessageRepository) {
         this.announceFileDir = announceFileDir;
         this.courseInfoRepository = courseInfoRepository;
         this.courseRegularGradeEventRepository = courseRegularGradeEventRepository;
@@ -74,7 +74,7 @@ public class CourseController {
 
     @RequestMapping("/list")
     public ModelAndView courseList() {
-        ModelAndView mav = new ModelAndView("course/list");
+        ModelAndView mav = new ModelAndView("teacher/course/list");
         List<CourseInfo> courseInfos = courseInfoRepository.findByTeacherId("00000000");
         mav.addObject("currYear", 2018);
         mav.addObject("currSemester", 0);
@@ -148,7 +148,7 @@ public class CourseController {
 
     @RequestMapping("/{courseDBId}/studentList")
     public ModelAndView studentList(@PathVariable long courseDBId) {
-        ModelAndView mav = new ModelAndView("course/sub/studentList");
+        ModelAndView mav = new ModelAndView("teacher/course/sub/studentList");
         List<CourseStudent> students = courseStudentRepository.findByAttachedId(courseDBId);
         mav.addObject("students", students);
         mav.addObject("navId", 0);
@@ -178,7 +178,7 @@ public class CourseController {
 
     @RequestMapping("/{courseDBId}/announcement")
     public ModelAndView announcement(@PathVariable long courseDBId) {
-        ModelAndView mav = new ModelAndView("course/sub/announcement");
+        ModelAndView mav = new ModelAndView("teacher/course/sub/announcement");
         List<CoursePost> announcements = coursePostRepository.findByAttachedId(courseDBId);
         mav.addObject("announcements", announcements);
         mav.addObject("navId", 1);
@@ -244,7 +244,7 @@ public class CourseController {
     @RequestMapping("/{courseDBId}/homework")
     public ModelAndView homework(@PathVariable long courseDBId,
                                  @RequestParam(defaultValue = "1") int week) {
-        ModelAndView mav = new ModelAndView("course/sub/homework");
+        ModelAndView mav = new ModelAndView("teacher/course/sub/homework");
         List<CourseStudentMessage> messages = courseStudentMessageRepository
                 .findByAttachedIdAndTypeAndHomeworkWeek(courseDBId, 0, week);
         mav.addObject("homeworkList", messages);
@@ -260,7 +260,7 @@ public class CourseController {
 
     @RequestMapping("/{courseDBId}/question")
     public ModelAndView question(@PathVariable long courseDBId) {
-        ModelAndView mav = new ModelAndView("course/sub/question");
+        ModelAndView mav = new ModelAndView("teacher/course/sub/question");
         List<CourseStudentMessage> questions = courseStudentMessageRepository.findByAttachedIdAndType(courseDBId, 1);
         mav.addObject("questions", questions);
         mav.addObject("navId", 3);
@@ -276,7 +276,7 @@ public class CourseController {
 
     @RequestMapping("/{courseDBId}/discussion")
     public ModelAndView discussion(@PathVariable long courseDBId) {
-        ModelAndView mav = new ModelAndView("course/sub/discussion");
+        ModelAndView mav = new ModelAndView("teacher/course/sub/discussion");
         List<CoursePost> discussions = coursePostRepository.findByAttachedIdAndType(courseDBId, 3);
         mav.addObject("discussions", discussions);
         mav.addObject("navId", 4);
@@ -285,7 +285,7 @@ public class CourseController {
 
     @RequestMapping("/{courseDBId}/weight")
     public ModelAndView weight(@PathVariable long courseDBId) {
-        ModelAndView mav = new ModelAndView("course/sub/weight");
+        ModelAndView mav = new ModelAndView("teacher/course/sub/weight");
         List<CourseRegularGradeEvent> events = courseRegularGradeEventRepository.findByAttachedId(courseDBId);
         mav.addObject("events", events);
         mav.addObject("navId", 5);

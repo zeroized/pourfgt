@@ -17,19 +17,6 @@
             <li><a href="/">首页</a></li>
             <li><a href="/teacher/course">本科生课程管理</a></li>
         </ol>
-        <ul class="nav nav-pills" style="margin-top: 15px">
-            <li role="presentation" class="active">
-                <a href="/teacher/course/list">
-                    课程列表
-                </a>
-            </li>
-            <li role="presentation">
-                <a href="/teacher/course/create">
-                    新建课程
-                </a>
-            </li>
-
-        </ul>
         <div class="panel panel-default" style="margin-top: 15px">
             <div class="panel-heading">课程列表</div>
             <div class="panel-body">
@@ -49,7 +36,7 @@
                         <#if course.year==currYear &&course.semester==currSemester>
                             <tr>
                                 <td>${course.courseId}</td>
-                                <td><a href="/teacher/course/${course.id}">${course.courseName}</a></td>
+                                <td><a href="/student/course/${course.id}">${course.courseName}</a></td>
                                 <td>${course.year}-${course.year+1}</td>
                                 <td>${semesters[course.semester]}</td>
                                 <td>激活</td>

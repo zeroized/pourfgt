@@ -5,23 +5,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/")
-public class PageController {
-    @RequestMapping("/")
+public class TeacherPageController {
+    @RequestMapping("/teacher")
     public String home() {
-        return "redirect:/teacher/course";
-    }
-
-    @RequestMapping("teacher/course")
-    public String courseHome() {
         return "redirect:/teacher/course/list";
     }
 
-    @RequestMapping("teacher/postgraduate")
+    @RequestMapping("/postgraduate")
     public String postgraduateHome() {
         return "postgraduate/home";
     }
 
-    @RequestMapping("teacher/graduationDesign")
+    @RequestMapping("/graduationDesign")
     public String graduationDesignHome() {
         return "graduationDesign/home";
     }
