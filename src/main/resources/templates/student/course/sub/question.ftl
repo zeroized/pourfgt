@@ -17,7 +17,7 @@
             <div class="panel-body">
                 <form class="form-horizontal" enctype="multipart/form-data"
                       action="/student/course/askQuestion" method="post">
-                    <input type="hidden" name="courseId" value="${courseId}">
+                    <input type="hidden" name="courseDBId" value="${courseId}">
                     <div class="form-group">
                         <label for="title" class="control-label col-md-3">标题</label>
                         <div class="col-md-7">
