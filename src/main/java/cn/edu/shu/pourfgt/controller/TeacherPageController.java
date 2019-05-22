@@ -11,13 +11,13 @@ public class TeacherPageController {
         return "redirect:/teacher/course/list";
     }
 
-    @RequestMapping("/postgraduate")
+    @RequestMapping("/teacher/postgraduate")
     public String postgraduateHome() {
         return "postgraduate/home";
     }
 
-    @RequestMapping("/graduationDesign")
-    public String graduationDesignHome() {
-        return "graduationDesign/home";
+    @RequestMapping("/teacher/graduation")
+    public String graduationHome() {
+        return "redirect:/teacher/graduation/list";
     }
 }

@@ -67,7 +67,9 @@ public class TeacherCourseController {
             model.addAttribute("courseId", courseInfo.getId());
             model.addAttribute("courseName", courseInfo.getCourseName());
         }
+        model.addAttribute("leftNavId", 0);
     }
+
 
     @RequestMapping("/list")
     public ModelAndView courseList() {

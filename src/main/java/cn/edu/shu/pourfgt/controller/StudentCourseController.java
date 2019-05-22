@@ -52,6 +52,7 @@ public class StudentCourseController {
             model.addAttribute("courseId", courseInfo.getId());
             model.addAttribute("courseName", courseInfo.getCourseName());
         }
+        model.addAttribute("leftNavId", 0);
     }
 
     @RequestMapping("/list")
@@ -109,7 +110,7 @@ public class StudentCourseController {
         ModelAndView mav = new ModelAndView("student/course/sub/question");
         List<CourseStudentMessage> questions = courseStudentMessageRepository.findByAttachedIdAndType(courseDBId, 1);
         mav.addObject("questions", questions);
-        mav.addObject("navId", 1);
+        mav.addObject("navId", 2);
         return mav;
     }
 

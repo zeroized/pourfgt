@@ -1,11 +1,10 @@
 <ol class="breadcrumb" style="margin-bottom:0">
     <li><a href="/">首页</a></li>
-    <li><a href="/teacher">本科生课程管理</a></li>
-    <li><a href="/teacher/course/${courseId}">${courseName}</a></li>
+    <li><a href="/teacher/graduation/list">本科生毕业设计管理</a></li>
 </ol>
 <ul class="nav nav-pills" style="margin-top: 15px">
-    <#assign navs=["studentList","announcement","homework","question","discussion","weight"]>
-    <#assign navNames=["学生名单","发布","平时作业","学生问题","研讨管理","修改权重"]>
+    <#assign navs=["studentList","timetable","message","checkMessage","inspection","weight"]>
+    <#assign navNames=["学生名单","时间节点","信息发布","信息查看","验收","研讨管理","修改权重"]>
     <#list 0..5 as index>
         <#if index==navId>
             <li role="presentation" class="active">
@@ -15,7 +14,7 @@
             </li>
         <#else >
             <li role="presentation">
-                <a href="/teacher/course/${courseId}/${navs[index]}">
+                <a href="/teacher/graduation/${navs[index]}?year=${year}&semester=${semester}">
                     ${navNames[index]}
                 </a>
             </li>

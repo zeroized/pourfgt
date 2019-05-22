@@ -10,7 +10,7 @@
 <#include "../../../layout/headerNav.ftl">
 
 <div class="container" style="margin-top: 15px">
-    <#include "../../../layout/leftNav.ftl">
+    <#include "../../../layout/teacherLeftNav.ftl">
     <div class="col-md-10 col-sm-10 col-lg-10 ">
         <#include "../../../layout/teacherCourseNav.ftl">
 
@@ -66,7 +66,7 @@
 
                     </tbody>
                 </table>
-
+                <hr style="border: 0.5px solid lightgrey">
                 <form class="form-horizontal" action="/course/record/${courseId}" method="post">
                     <input type="hidden" name="studentId" id="studentIdInput">
                     <div class="form-group">

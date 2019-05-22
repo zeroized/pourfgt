@@ -9,7 +9,7 @@
 <body style="width:100%;height:100%;">
 <#include "../../../layout/headerNav.ftl">
 <div class="container" style="margin-top: 15px">
-    <#include "../../../layout/leftNav.ftl">
+    <#include "../../../layout/teacherLeftNav.ftl">
     <div class="col-md-10 col-sm-10 col-lg-10 ">
         <#include "../../../layout/studentCourseNav.ftl">
         <div class="panel panel-default" style="margin-top: 15px">
