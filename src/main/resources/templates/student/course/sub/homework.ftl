@@ -11,23 +11,10 @@
 <div class="container" style="margin-top: 15px">
     <#include "../../../layout/leftNav.ftl">
     <div class="col-md-10 col-sm-10 col-lg-10 ">
-        <#include "../../../layout/courseNav.ftl">
+        <#include "../../../layout/studentCourseNav.ftl">
         <div class="panel panel-default" style="margin-top: 15px">
             <div class="panel-heading">平时作业</div>
             <div class="panel-body">
-                <form class="form-horizontal">
-                    <div class="form-group">
-                        <label class="control-label col-md-2">周次</label>
-                        <div class="col-md-5">
-                            <select class="form-control">
-                                <option></option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit">查看</button>
-                        </div>
-                    </div>
-                </form>
                 <table class="table table-hover">
                     <thead>
                     <tr>
@@ -47,7 +34,7 @@
                                 <button class="btn btn-primary"
                                         data-toggle="modal" data-target="#homeworkDetail"
                                         data-id="${homework.id}"
-                                >批改作业
+                                >查看作业
                                 </button>
                             </td>
                         </tr>
@@ -80,7 +67,7 @@
         var button = $(event.relatedTarget); // Button that triggered the modal
         var id = button.data("id");
         //TODO adding ajax query here
-        $.getJSON("/student/course/getHomework/" + id, function (data) {
+        $.getJSON("/student/course/getPost/" + id, function (data) {
             var body = modal.find('.modal-body');
             // var types = ["信息", "资料", "作业"];
             // body.append("<h4>标题</h4>" +

@@ -12,7 +12,7 @@
 <div class="container" style="margin-top: 15px">
     <#include "../../../layout/leftNav.ftl">
     <div class="col-md-10 col-sm-10 col-lg-10 ">
-        <#include "../../../layout/courseNav.ftl">
+        <#include "../../../layout/teacherCourseNav.ftl">
         <div class="panel panel-default" style="margin-top: 15px">
             <div class="panel-heading">平时作业</div>
             <div class="panel-body">

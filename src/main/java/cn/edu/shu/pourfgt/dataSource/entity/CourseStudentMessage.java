@@ -18,6 +18,7 @@ public class CourseStudentMessage {
     private long studentId;
     private long createTime;
 
+    private String title;
     private String content;
     private boolean hasFile;
     private String filePath;
@@ -76,6 +77,14 @@ public class CourseStudentMessage {
 
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getContent() {

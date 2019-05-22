@@ -12,5 +12,7 @@ public interface CoursePostRepository extends CrudRepository<CoursePost, Long> {
 
     List<CoursePost> findByAttachedIdAndType(long attachedId, int type);
 
+    List<CoursePost> findByAttachedIdAndTypeOrType(long attachedId, int type, int type2);
+
     CoursePost findById(long id);
 }
