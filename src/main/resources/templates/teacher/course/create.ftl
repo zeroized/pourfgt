@@ -135,7 +135,7 @@
                                    name="normalRatio" placeholder="请输入平时成绩占比">
                         </div>
                     </div>
-                    <p class="text-center">平时成绩项目明细</p>
+                    <hr style="border: lightgrey">
                     <div id="courseGradeGroup">
                         <div class="form-group">
                             <label class="col-md-1 col-md-offset-2 control-label">项目：</label>

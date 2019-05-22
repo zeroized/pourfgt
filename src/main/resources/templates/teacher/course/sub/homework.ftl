@@ -28,6 +28,7 @@
                         </div>
                     </div>
                 </form>
+                <hr style="border: lightgrey">
                 <table class="table table-hover">
                     <thead>
                     <tr>

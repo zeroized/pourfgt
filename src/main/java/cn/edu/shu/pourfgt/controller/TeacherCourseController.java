@@ -81,7 +81,7 @@ public class TeacherCourseController {
 
     @RequestMapping("/create")
     public String courseCreate() {
-        return "course/create";
+        return "teacher/course/create";
     }
 
 
