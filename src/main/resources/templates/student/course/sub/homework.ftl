@@ -31,18 +31,18 @@
                 <table class="table table-hover">
                     <thead>
                     <tr>
-                        <td>学号</td>
-                        <td>提交时间</td>
-                        <td>是否逾期</td>
+                        <td>周次</td>
+                        <td>创建时间</td>
+                        <td>截止日期</td>
                         <td>操作</td>
                     </tr>
                     </thead>
                     <tbody>
                     <#list homeworkList as homework>
                         <tr>
-                            <td>${homework.studentId}</td>
+                            <td>${homework.week}</td>
                             <td>${homework.createTime}</td>
-                            <td>${homework.overdue}</td>
+                            <td>${homework.deadline}</td>
                             <td>
                                 <button class="btn btn-primary"
                                         data-toggle="modal" data-target="#homeworkDetail"
@@ -80,7 +80,7 @@
         var button = $(event.relatedTarget); // Button that triggered the modal
         var id = button.data("id");
         //TODO adding ajax query here
-        $.getJSON("/teacher/course/getHomework/" + id, function (data) {
+        $.getJSON("/student/course/getHomework/" + id, function (data) {
             var body = modal.find('.modal-body');
             // var types = ["信息", "资料", "作业"];
             // body.append("<h4>标题</h4>" +

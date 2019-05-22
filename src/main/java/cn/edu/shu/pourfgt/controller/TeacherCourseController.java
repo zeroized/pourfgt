@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/teacher/course")
@@ -63,12 +62,10 @@ public class TeacherCourseController {
     @ModelAttribute
     public void addCourseInfo(@PathVariable(required = false) Long courseDBId, Model model) {
         if (courseDBId != null) {
-            Optional<CourseInfo> courseInfoOption = courseInfoRepository.findById(courseDBId);
-            if (courseInfoOption.isPresent()) {
-                CourseInfo courseInfo = courseInfoOption.get();
-                model.addAttribute("courseId", courseInfo.getId());
-                model.addAttribute("courseName", courseInfo.getCourseName());
-            }
+            long id = courseDBId;
+            CourseInfo courseInfo = courseInfoRepository.findById(id);
+            model.addAttribute("courseId", courseInfo.getId());
+            model.addAttribute("courseName", courseInfo.getCourseName());
         }
     }
 

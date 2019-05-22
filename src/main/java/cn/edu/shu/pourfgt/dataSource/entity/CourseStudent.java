@@ -13,6 +13,7 @@ public class CourseStudent {
     private long attachedId;
     private long studentId;
     private String studentName;
+    private double score = -1;
 
     public long getId() {
         return id;
@@ -44,5 +45,13 @@ public class CourseStudent {
 
     public void setStudentName(String studentName) {
         this.studentName = studentName;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
     }
 }

@@ -66,7 +66,7 @@
         var button = $(event.relatedTarget); // Button that triggered the modal
         var id = button.data("id");
         //TODO adding ajax query here
-        $.getJSON("/course/getQuestion/" + id, function (data) {
+        $.getJSON("/teacher/course/getQuestion/" + id, function (data) {
             var body = modal.find('.modal-body');
             // var types = ["信息", "资料", "作业"];
             // body.append("<h4>标题</h4>" +

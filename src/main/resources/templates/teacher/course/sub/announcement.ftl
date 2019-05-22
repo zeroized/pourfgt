@@ -126,7 +126,7 @@
         var id = button.data("id");
         // var courseId=button.data("queryCourse");
         //TODO adding ajax query here
-        $.getJSON("/course/getAnnouncement?id=" + id, function (data) {
+        $.getJSON("/teacher/course/getAnnouncement?id=" + id, function (data) {
             var body = modal.find('.modal-body');
             var types = ["信息", "资料", "作业", "研讨"];
             body.append("<h4>标题</h4>" +

@@ -106,7 +106,7 @@
         var studentId = button.data("student");
         // var courseId=button.data("queryCourse");
         //TODO adding ajax query here
-        $.getJSON("/course/${courseId}/getScore/" + studentId, function (data) {
+        $.getJSON("/teacher/course/${courseId}/getScore/" + studentId, function (data) {
             data.forEach(function (datum) {
                 modal.find('tbody').append("" +
                     "<tr>" +

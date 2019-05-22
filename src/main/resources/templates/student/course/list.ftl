@@ -15,7 +15,7 @@
     <div class="col-md-10 col-sm-10 col-lg-10 ">
         <ol class="breadcrumb" style="margin-bottom:0">
             <li><a href="/">首页</a></li>
-            <li><a href="/teacher/course">本科生课程管理</a></li>
+            <li><a href="/student">本科生课程管理</a></li>
         </ol>
         <div class="panel panel-default" style="margin-top: 15px">
             <div class="panel-heading">课程列表</div>
@@ -24,32 +24,18 @@
                     <thead>
                     <tr>
                         <td>课程号</td>
-                        <td>课程名</td>
-                        <td>学年</td>
-                        <td>学期</td>
+                        <td>得分</td>
                         <td>状态</td>
                     </tr>
                     </thead>
                     <tbody>
                     <#assign semesters=["秋季","冬季","春季","夏季"]>
                     <#list courses as course>
-                        <#if course.year==currYear &&course.semester==currSemester>
-                            <tr>
-                                <td>${course.courseId}</td>
-                                <td><a href="/student/course/${course.id}">${course.courseName}</a></td>
-                                <td>${course.year}-${course.year+1}</td>
-                                <td>${semesters[course.semester]}</td>
-                                <td>激活</td>
-                            </tr>
-                        <#else >
-                            <tr>
-                                <td>${course.courseId}</td>
-                                <td>${course.courseName}</td>
-                                <td>${course.year}-${course.year+1}</td>
-                                <td>${semesters[course.semester]}</td>
-                                <td>已完成</td>
-                            </tr>
-                        </#if>
+                        <tr>
+                            <td><a href="/student/course/${course.attachedId}">${course.attachedId}</a></td>
+                            <td>${course.score}</td>
+                            <td>激活</td>
+                        </tr>
                     </#list>
                     </tbody>
                 </table>
