@@ -1,19 +1,22 @@
 package cn.edu.shu.pourfgt.controller;
 
+import cn.edu.shu.pourfgt.dataSource.dao.GraduationPostRepository;
 import cn.edu.shu.pourfgt.dataSource.dao.GraduationTimetableRepository;
 import cn.edu.shu.pourfgt.dataSource.dao.GraduationWorkRepository;
+import cn.edu.shu.pourfgt.dataSource.entity.GraduationPost;
 import cn.edu.shu.pourfgt.dataSource.entity.GraduationTimetable;
 import cn.edu.shu.pourfgt.dataSource.entity.GraduationWork;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.datetime.DateFormatter;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -22,14 +25,17 @@ import java.util.List;
 public class TeacherGraduationController {
     private final GraduationTimetableRepository graduationTimetableRepository;
     private int currentYear = 2018;
-
+    private final GraduationPostRepository graduationPostRepository;
+    @Value("${course.announcement.file-path}")
+    private String postFileDir;
     private final GraduationWorkRepository graduationWorkRepository;
     private int currentSemester = 0;
 
     public TeacherGraduationController(GraduationWorkRepository graduationWorkRepository,
-                                       GraduationTimetableRepository graduationTimetableRepository) {
+                                       GraduationTimetableRepository graduationTimetableRepository, GraduationPostRepository graduationPostRepository) {
         this.graduationWorkRepository = graduationWorkRepository;
         this.graduationTimetableRepository = graduationTimetableRepository;
+        this.graduationPostRepository = graduationPostRepository;
     }
 
     @InitBinder
@@ -64,6 +70,7 @@ public class TeacherGraduationController {
         newWork.setDescription(description);
         newWork.setYear(currentYear);
         newWork.setSemester(currentSemester);
+        graduationWorkRepository.save(newWork);
         return "redirect:/teacher/graduation/list";
     }
 
@@ -87,4 +94,47 @@ public class TeacherGraduationController {
         graduationTimetableRepository.save(newEvent);
         return "redirect:/teacher/graduation/timetable";
     }
+
+    @RequestMapping("/post")
+    public ModelAndView post() {
+        ModelAndView mav = new ModelAndView("teacher/graduation/post");
+        List<GraduationPost> posts = graduationPostRepository
+                .findByYearAndSemester(currentYear, currentSemester);
+        mav.addObject("posts", posts);
+        mav.addObject("navId", 2);
+        return mav;
+    }
+
+    @PostMapping("/addPost")
+    public String addPost(String title, String content,
+                          @RequestParam(required = false) MultipartFile file,
+                          @RequestParam(required = false) Date notifyDate) throws IOException {
+        GraduationPost newPost = new GraduationPost();
+        long currentTime = new Date().getTime();
+        newPost.setCreateTime(currentTime);
+        newPost.setYear(currentYear);
+        newPost.setSemester(currentSemester);
+        newPost.setTitle(title);
+        newPost.setContent(content);
+        if (file != null) {
+            String localFilePath = postFileDir + currentYear + "-" + currentSemester + "_" + currentTime + "_" + file.getOriginalFilename();
+            File localFile = new File(localFilePath);
+            file.transferTo(localFile);
+            newPost.setHasFile(true);
+            newPost.setFilePath(localFilePath);
+        }
+        if (notifyDate != null) {
+            newPost.setHasNotification(true);
+            newPost.setNotifyDate(notifyDate.getTime());
+        }
+        graduationPostRepository.save(newPost);
+        return "redirect:/teacher/graduation/post";
+    }
+
+    @GetMapping("/getPost")
+    public @ResponseBody
+    GraduationPost getPost(long id) {
+        return graduationPostRepository.findById(id);
+    }
+
 }

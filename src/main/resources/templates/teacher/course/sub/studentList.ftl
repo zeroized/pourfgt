@@ -67,7 +67,7 @@
                     </tbody>
                 </table>
                 <hr style="border: 0.5px solid lightgrey">
-                <form class="form-horizontal" action="/course/record/${courseId}" method="post">
+                <form class="form-horizontal" action="/teacher/course/record/${courseId}" method="post">
                     <input type="hidden" name="studentId" id="studentIdInput">
                     <div class="form-group">
                         <label for="eventName" class="col-md-2 control-label">项目名</label>

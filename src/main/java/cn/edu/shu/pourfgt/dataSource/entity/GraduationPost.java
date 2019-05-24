@@ -6,23 +6,23 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class CoursePost {
+public class GraduationPost {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    private long attachedId;
+    private int year;
+    private int semester;
+
     private long createTime;
 
     private String title;
     private String content;
 
-    private int type;//0 通知;1 资料;2 作业;3 研讨
     private boolean hasFile = false;
     private String filePath = "";
 
-    private boolean hasDeadline = false;
-    private int week = -1;
-    private int deadline = -1;//周次
+    private boolean hasNotification = false;
+    private long notifyDate = -1;
 
     public long getId() {
         return id;
@@ -32,12 +32,20 @@ public class CoursePost {
         this.id = id;
     }
 
-    public long getAttachedId() {
-        return attachedId;
+    public int getYear() {
+        return year;
     }
 
-    public void setAttachedId(long attachedId) {
-        this.attachedId = attachedId;
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getSemester() {
+        return semester;
+    }
+
+    public void setSemester(int semester) {
+        this.semester = semester;
     }
 
     public long getCreateTime() {
@@ -64,13 +72,6 @@ public class CoursePost {
         this.content = content;
     }
 
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
 
     public boolean isHasFile() {
         return hasFile;
@@ -88,27 +89,19 @@ public class CoursePost {
         this.filePath = filePath;
     }
 
-    public boolean isHasDeadline() {
-        return hasDeadline;
+    public boolean isHasNotification() {
+        return hasNotification;
     }
 
-    public void setHasDeadline(boolean hasDeadline) {
-        this.hasDeadline = hasDeadline;
+    public void setHasNotification(boolean hasNotification) {
+        this.hasNotification = hasNotification;
     }
 
-    public int getWeek() {
-        return week;
+    public long getNotifyDate() {
+        return notifyDate;
     }
 
-    public void setWeek(int week) {
-        this.week = week;
-    }
-
-    public int getDeadline() {
-        return deadline;
-    }
-
-    public void setDeadline(int deadline) {
-        this.deadline = deadline;
+    public void setNotifyDate(long notifyDate) {
+        this.notifyDate = notifyDate;
     }
 }

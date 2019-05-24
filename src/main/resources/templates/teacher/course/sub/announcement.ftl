@@ -16,7 +16,7 @@
             <div class="panel-heading">发布</div>
             <div class="panel-body">
                 <form class="form-horizontal" enctype="multipart/form-data"
-                      action="/course/post/${courseId}" method="post">
+                      action="/teacher/course/post/${courseId}" method="post">
                     <div class="form-group">
                         <label for="title" class="control-label col-md-3">标题</label>
                         <div class="col-md-7">
@@ -142,7 +142,7 @@
                 "<p>" + types[data.type] + "</p>");
             if (data.hasFile) {
                 body.append("<h4>附件</h4>" +
-                    "<a href=\"/course/getAnnouncementFile?id=" + id + "\">下载</a>");
+                    "<a href=\"/teacher/course/getAnnouncementFile?id=" + id + "\">下载</a>");
             }
             if (data.hasDeadline) {
                 var deadline = new Date();

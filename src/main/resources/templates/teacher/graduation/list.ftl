@@ -41,7 +41,8 @@
                     </tbody>
                 </table>
                 <hr style="border: 0.5px solid lightgrey">
-                <form class="form-horizontal">
+                <form class="form-horizontal"
+                      action="/teacher/graduation/addWork" method="post">
                     <div class="form-group">
                         <label for="studentId" class="control-label col-md-3">学号</label>
                         <div class="col-md-7">
