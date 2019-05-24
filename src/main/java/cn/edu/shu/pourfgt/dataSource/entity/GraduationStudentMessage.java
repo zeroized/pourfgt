@@ -6,22 +6,23 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class CourseStudentMessage {
+public class GraduationStudentMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    private long attachedId;
-    private int type;//0 作业;1 问题
-
-    private int homeworkWeek = -1;
-    private boolean overdue = false;
     private long studentId;
+    private int year;
+    private int semester;
+
     private long createTime;
 
     private String title;
     private String content;
-    private boolean hasFile;
-    private String filePath;
+    private boolean hasFile = false;
+    private String filePath = "";
+
+    private boolean hasNotification = false;
+    private long notifyDate = -1;
 
     private boolean hasResponse = false;
     private String response = "";
@@ -34,44 +35,28 @@ public class CourseStudentMessage {
         this.id = id;
     }
 
-    public long getAttachedId() {
-        return attachedId;
-    }
-
-    public void setAttachedId(long attachedId) {
-        this.attachedId = attachedId;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public int getHomeworkWeek() {
-        return homeworkWeek;
-    }
-
-    public void setHomeworkWeek(int homeworkWeek) {
-        this.homeworkWeek = homeworkWeek;
-    }
-
-    public boolean isOverdue() {
-        return overdue;
-    }
-
-    public void setOverdue(boolean overdue) {
-        this.overdue = overdue;
-    }
-
     public long getStudentId() {
         return studentId;
     }
 
     public void setStudentId(long studentId) {
         this.studentId = studentId;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getSemester() {
+        return semester;
+    }
+
+    public void setSemester(int semester) {
+        this.semester = semester;
     }
 
     public long getCreateTime() {
@@ -112,6 +97,22 @@ public class CourseStudentMessage {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public boolean isHasNotification() {
+        return hasNotification;
+    }
+
+    public void setHasNotification(boolean hasNotification) {
+        this.hasNotification = hasNotification;
+    }
+
+    public long getNotifyDate() {
+        return notifyDate;
+    }
+
+    public void setNotifyDate(long notifyDate) {
+        this.notifyDate = notifyDate;
     }
 
     public boolean isHasResponse() {

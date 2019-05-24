@@ -186,10 +186,10 @@ public class TeacherCourseController {
 
     @PostMapping("/post/{courseDBId}")
     public String releasePost(@PathVariable long courseDBId, String title,
-                                      String content, int type,
-                                      @RequestParam(required = false) int week,
-                                      @RequestParam(required = false) MultipartFile file,
-                                      @RequestParam(required = false) Integer deadline)
+                              String content, int type,
+                              @RequestParam(required = false) Integer week,
+                              @RequestParam(required = false) MultipartFile file,
+                              @RequestParam(required = false) Integer deadline)
             throws IOException {
         CoursePost newAnnouncement = new CoursePost();
         newAnnouncement.setAttachedId(courseDBId);

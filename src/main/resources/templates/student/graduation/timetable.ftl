@@ -13,28 +13,23 @@
 <div class="container" style="margin-top: 15px">
     <#include "../../layout/studentLeftNav.ftl">
     <div class="col-md-10 col-sm-10 col-lg-10 ">
-        <ol class="breadcrumb" style="margin-bottom:0">
-            <li><a href="/">首页</a></li>
-            <li><a href="/student">本科生课程管理</a></li>
-        </ol>
+        <#include "../../layout/studentGraduationNav.ftl">
         <div class="panel panel-default" style="margin-top: 15px">
-            <div class="panel-heading">课程列表</div>
+            <div class="panel-heading">时间节点</div>
             <div class="panel-body">
                 <table class="table">
                     <thead>
                     <tr>
-                        <td>课程号</td>
-                        <td>得分</td>
-                        <td>状态</td>
+                        <td>时间</td>
+                        <td>事件</td>
                     </tr>
                     </thead>
                     <tbody>
                     <#assign semesters=["秋季","冬季","春季","夏季"]>
-                    <#list courses as course>
+                    <#list events as event>
                         <tr>
-                            <td><a href="/student/course/${course.attachedId}">${course.attachedId}</a></td>
-                            <td>${course.score}</td>
-                            <td>激活</td>
+                            <td>${event.keyDate}</td>
+                            <td>${event.event}</td>
                         </tr>
                     </#list>
                     </tbody>

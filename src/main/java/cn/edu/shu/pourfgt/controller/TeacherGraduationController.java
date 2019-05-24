@@ -1,9 +1,11 @@
 package cn.edu.shu.pourfgt.controller;
 
 import cn.edu.shu.pourfgt.dataSource.dao.GraduationPostRepository;
+import cn.edu.shu.pourfgt.dataSource.dao.GraduationStudentMessageRepository;
 import cn.edu.shu.pourfgt.dataSource.dao.GraduationTimetableRepository;
 import cn.edu.shu.pourfgt.dataSource.dao.GraduationWorkRepository;
 import cn.edu.shu.pourfgt.dataSource.entity.GraduationPost;
+import cn.edu.shu.pourfgt.dataSource.entity.GraduationStudentMessage;
 import cn.edu.shu.pourfgt.dataSource.entity.GraduationTimetable;
 import cn.edu.shu.pourfgt.dataSource.entity.GraduationWork;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,11 +33,16 @@ public class TeacherGraduationController {
     private final GraduationWorkRepository graduationWorkRepository;
     private int currentSemester = 0;
 
+    private final GraduationStudentMessageRepository graduationStudentMessageRepository;
+
     public TeacherGraduationController(GraduationWorkRepository graduationWorkRepository,
-                                       GraduationTimetableRepository graduationTimetableRepository, GraduationPostRepository graduationPostRepository) {
+                                       GraduationTimetableRepository graduationTimetableRepository,
+                                       GraduationPostRepository graduationPostRepository,
+                                       GraduationStudentMessageRepository graduationStudentMessageRepository) {
         this.graduationWorkRepository = graduationWorkRepository;
         this.graduationTimetableRepository = graduationTimetableRepository;
         this.graduationPostRepository = graduationPostRepository;
+        this.graduationStudentMessageRepository = graduationStudentMessageRepository;
     }
 
     @InitBinder
@@ -135,6 +142,23 @@ public class TeacherGraduationController {
     public @ResponseBody
     GraduationPost getPost(long id) {
         return graduationPostRepository.findById(id);
+    }
+
+    @RequestMapping("/message")
+    public ModelAndView message() {
+        ModelAndView mav = new ModelAndView("teacher/graduation/message");
+        List<GraduationStudentMessage> messages = graduationStudentMessageRepository
+                .findByYearAndSemester(currentYear, currentSemester);
+
+        mav.addObject("messages", messages);
+        mav.addObject("navId", 3);
+        return mav;
+    }
+
+    @RequestMapping("/weight")
+    public ModelAndView weight() {
+        ModelAndView mav = new ModelAndView("teacher/graduation/weight");
+        return mav;
     }
 
 }
