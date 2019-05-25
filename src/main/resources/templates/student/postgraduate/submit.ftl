@@ -21,15 +21,13 @@
                     <thead>
                     <tr>
                         <td>项目</td>
-                        <td>状态</td>
                         <td>提交日期</td>
                     </tr>
                     </thead>
                     <tbody>
                     <#list submissions as submission>
                         <tr>
-                            <td>${submission.event}</td>
-                            <td>已提交</td>
+                            <td>${submission.type}</td>
                             <td>${submission.submitDate}</td>
                         </tr>
                     </#list>
