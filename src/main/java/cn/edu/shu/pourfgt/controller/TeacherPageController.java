@@ -13,7 +13,7 @@ public class TeacherPageController {
 
     @RequestMapping("/teacher/postgraduate")
     public String postgraduateHome() {
-        return "postgraduate/home";
+        return "redirect:/teacher/postgraduate/list";
     }
 
     @RequestMapping("/teacher/graduation")

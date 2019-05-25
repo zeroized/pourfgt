@@ -11,7 +11,7 @@
             </a>
         </li>
         <li role="presentation">
-            <a href="/teacher/postgraduate">
+            <a href="/teacher/postgraduate/list">
                 <span class="glyphicon glyphicon-home"></span>&nbsp; 研究生日常管理
             </a>
         </li>

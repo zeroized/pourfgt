@@ -155,9 +155,16 @@ public class TeacherGraduationController {
         return mav;
     }
 
+    @GetMapping("/getMessage")
+    public @ResponseBody
+    GraduationStudentMessage getMessage(long id) {
+        return graduationStudentMessageRepository.findById(id);
+    }
+
     @RequestMapping("/weight")
     public ModelAndView weight() {
         ModelAndView mav = new ModelAndView("teacher/graduation/weight");
+        mav.addObject("navId", 4);
         return mav;
     }
 
