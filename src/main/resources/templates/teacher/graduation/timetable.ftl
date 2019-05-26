@@ -28,7 +28,7 @@
                     <#assign semesters=["秋季","冬季","春季","夏季"]>
                     <#list events as event>
                         <tr>
-                            <td>${event.keyDate}</td>
+                            <td>${event.keyDate?number_to_date}</td>
                             <td>${event.event}</td>
                         </tr>
                     </#list>

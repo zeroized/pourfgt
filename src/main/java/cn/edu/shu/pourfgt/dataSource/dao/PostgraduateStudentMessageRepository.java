@@ -9,4 +9,5 @@ public interface PostgraduateStudentMessageRepository extends CrudRepository<Pos
     PostgraduateStudentMessage findById(long id);
 
     List<PostgraduateStudentMessage> findAll();
+
 }

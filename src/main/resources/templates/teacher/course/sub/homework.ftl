@@ -15,12 +15,19 @@
         <div class="panel panel-default" style="margin-top: 15px">
             <div class="panel-heading">平时作业</div>
             <div class="panel-body">
-                <form class="form-horizontal">
+                <form class="form-horizontal"
+                      action="/teacher/course/${courseId}/homework" method="get">
                     <div class="form-group">
-                        <label class="control-label col-md-2">周次</label>
-                        <div class="col-md-5">
-                            <select class="form-control">
-                                <option></option>
+                        <label for="week" class="control-label col-md-2">周次</label>
+                        <div class="col-md-3">
+                            <select class="form-control" name="week" id="week">
+                                <#list 1..10 as index>
+                                    <#if index==week>
+                                        <option value="${index}" selected>${index}</option>
+                                    <#else >
+                                        <option value="${index}">${index}</option>
+                                    </#if>
+                                </#list>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -42,8 +49,8 @@
                     <#list homeworkList as homework>
                         <tr>
                             <td>${homework.studentId}</td>
-                            <td>${homework.createTime}</td>
-                            <td>${homework.overdue}</td>
+                            <td>${homework.createTime?number_to_date}</td>
+                            <td>${homework.overdue?string('是','否')}</td>
                             <td>
                                 <button class="btn btn-primary"
                                         data-toggle="modal" data-target="#homeworkDetail"
@@ -69,6 +76,18 @@
                 <h4 class="modal-title" id="myModalLabel">作业详情</h4>
             </div>
             <div class="modal-body">
+                <h4>标题</h4>
+                <p id="homework-title"></p>
+                <h4>内容</h4>
+                <p id="homework-content"></p>
+                <h4>周次</h4>
+                <p id="homework-week"></p>
+                <h4>截至周次</h4>
+                <p id="homework-deadline"></p>
+                <h4>发布时间</h4>
+                <p id="homework-create"></p>
+                <h4>附件</h4>
+                <a id="homework-file"></a>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -77,38 +96,26 @@
     </div>
 </div>
 <script>
+    //TODO to be tested
     $('#homeworkDetail').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var id = button.data("id");
         //TODO adding ajax query here
         $.getJSON("/teacher/course/getHomework/" + id, function (data) {
-            var body = modal.find('.modal-body');
-            // var types = ["信息", "资料", "作业"];
-            // body.append("<h4>标题</h4>" +
-            //     "<p>" + data.title + "</p>");
-            // body.append("<h4>内容</h4>" +
-            //     "<p>" + data.content + "</p>");
-            // var createTime = new Date();
-            // createTime.setTime(data.createTime);
-            // body.append("<h4>发布时间</h4>" +
-            //     "<p>" + createTime + "</p>");
-            // body.append("<h4>信息类型</h4>" +
-            //     "<p>" + types[data.type] + "</p>");
-            // if (data.hasFile) {
-            //     body.append("<h4>附件</h4>" +
-            //         "<a href=\"/course/getAnnouncementFile/" + id + "\">下载</a>");
-            // }
-            // if (data.hasDeadline) {
-            //     var deadline = new Date();
-            //     deadline.setTime(data.deadline);
-            //     body.append("<h4>截止日期</h4>" +
-            //         "<p>" + deadline + "</p>")
-            // }
+            var homework = data;
+            var createTime = new Date();
+            createTime.setTime(homework.createTime);
+            modal.find("#homework-title").text(homework.title);
+            modal.find("#homework-content").text(homework.content);
+            modal.find("#homework-create").text(createTime);
+            if (!homework.hasFile) {
+                modal.find("#homework-file").text("无附件");
+            } else {
+                modal.find("#homework-file").text("下载");
+                modal.find("#homework-file").attr("href", "/teacher/course/getHomeworkFile?id=" + id);
+            }
 
         });
-        var modal = $(this);
-        // modal.find('.modal-title').text(studentId + "成绩详细");
-        // modal.find('#studentIdInput').val(studentId);
     });
 </script>
 </body>

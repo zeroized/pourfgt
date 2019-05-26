@@ -2,12 +2,11 @@ package cn.edu.shu.pourfgt.controller;
 
 import cn.edu.shu.pourfgt.dataSource.dao.*;
 import cn.edu.shu.pourfgt.dataSource.entity.*;
+import cn.edu.shu.pourfgt.util.FileUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.datetime.DateFormatter;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,42 +15,45 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Controller
 @RequestMapping("/teacher/course")
 public class TeacherCourseController {
-    private final String announceFileDir;
     private final CourseStudentMessageRepository courseStudentMessageRepository;
-
     private final CourseInfoRepository courseInfoRepository;
     private final CourseRegularGradeEventRepository courseRegularGradeEventRepository;
     private final CourseStudentRepository courseStudentRepository;
     private final CourseRegularGradeRecordRepository courseRegularGradeRecordRepository;
     private final CoursePostRepository coursePostRepository;
+    private final CourseDiscussionRepository courseDiscussionRepository;
     @Value("${course.semester.start-day}")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date startDay;
+    @Value("${course.announcement.file-path}")
+    private String announceFileDir;
+    @Value("${course.current.year}")
+    private int currentYear;
+    @Value("${course.current.semester}")
+    private int currentSemester;
 
-    public TeacherCourseController(@Value("${course.announcement.file-path}") String announceFileDir,
-                                   CourseInfoRepository courseInfoRepository,
+    public TeacherCourseController(CourseInfoRepository courseInfoRepository,
                                    CourseRegularGradeEventRepository courseRegularGradeEventRepository,
                                    CourseStudentRepository courseStudentRepository,
-                                   CourseRegularGradeRecordRepository courseRegularGradeRecordRepository, CoursePostRepository coursePostRepository, CourseStudentMessageRepository courseStudentMessageRepository) {
-        this.announceFileDir = announceFileDir;
+                                   CourseRegularGradeRecordRepository courseRegularGradeRecordRepository, CoursePostRepository coursePostRepository, CourseStudentMessageRepository courseStudentMessageRepository, CourseDiscussionRepository courseDiscussionRepository) {
         this.courseInfoRepository = courseInfoRepository;
         this.courseRegularGradeEventRepository = courseRegularGradeEventRepository;
         this.courseStudentRepository = courseStudentRepository;
         this.courseRegularGradeRecordRepository = courseRegularGradeRecordRepository;
         this.coursePostRepository = coursePostRepository;
         this.courseStudentMessageRepository = courseStudentMessageRepository;
+        this.courseDiscussionRepository = courseDiscussionRepository;
     }
 
     @InitBinder
@@ -60,23 +62,27 @@ public class TeacherCourseController {
     }
 
     @ModelAttribute
-    public void addCourseInfo(@PathVariable(required = false) Long courseDBId, Model model) {
+    public void initModel(@PathVariable(required = false) Long courseDBId, Model model,
+                          HttpServletRequest request) {
         if (courseDBId != null) {
             long id = courseDBId;
             CourseInfo courseInfo = courseInfoRepository.findById(id);
             model.addAttribute("courseId", courseInfo.getId());
             model.addAttribute("courseName", courseInfo.getCourseName());
         }
+        HttpSession session = request.getSession();
+        String userId = (String) session.getAttribute("userId");
+        model.addAttribute("teacherId", userId);
         model.addAttribute("leftNavId", 0);
     }
 
 
     @RequestMapping("/list")
-    public ModelAndView courseList() {
+    public ModelAndView courseList(Model model) {
         ModelAndView mav = new ModelAndView("teacher/course/list");
-        List<CourseInfo> courseInfos = courseInfoRepository.findByTeacherId("00000000");
-        mav.addObject("currYear", 2018);
-        mav.addObject("currSemester", 0);
+        List<CourseInfo> courseInfos = courseInfoRepository.findByTeacherId((String) model.asMap().get("teacherId"));
+        mav.addObject("currYear", currentYear);
+        mav.addObject("currSemester", currentSemester);
         mav.addObject("courses", courseInfos);
         return mav;
     }
@@ -90,7 +96,7 @@ public class TeacherCourseController {
     @PostMapping("/createCourse")
     public String createCourse(String courseId, String courseName, Integer[] courseType,
                                Integer discussionType, MultipartFile studentList, Integer scoreType,
-                               Double normalRatio, String[] name, Double[] ratio) {
+                               Double normalRatio, String[] name, Double[] ratio, Model model) {
         CourseInfo newCourse = new CourseInfo();
         newCourse.setCourseId(courseId);
         newCourse.setCourseName(courseName);
@@ -107,12 +113,11 @@ public class TeacherCourseController {
         newCourse.setScoreType(scoreType);
         newCourse.setNormalRatio(normalRatio);
 
-        //TODO revise year and semester
-        newCourse.setYear(2018);
-        newCourse.setSemester(0);
+        newCourse.setYear(this.currentYear);
+        newCourse.setSemester(this.currentSemester);
 
-        //TODO revise teacher id
-        newCourse.setTeacherId("00000000");
+        String teacherId = (String) model.asMap().get("teacherId");
+        newCourse.setTeacherId(teacherId);
 
         long id = courseInfoRepository.save(newCourse).getId();
 
@@ -132,6 +137,7 @@ public class TeacherCourseController {
         for (int i = 0; i < name.length; i++) {
             CourseRegularGradeEvent newGrade = new CourseRegularGradeEvent();
             newGrade.setAttachedId(id);
+            newGrade.setCourseId(courseId);
             newGrade.setName(name[i]);
             newGrade.setRatio(ratio[i]);
             newGrade.setCourseId(courseId);
@@ -157,7 +163,6 @@ public class TeacherCourseController {
     @PostMapping("/record/{courseDBId}")
     public String recordRegularGrade(@PathVariable long courseDBId, long studentId,
                                      String eventName, long score) {
-        //TODO add checking the group discussion score
         CourseRegularGradeRecord newRecord = new CourseRegularGradeRecord();
         newRecord.setAttachedId(courseDBId);
         newRecord.setStudentId(studentId);
@@ -189,7 +194,8 @@ public class TeacherCourseController {
                               String content, int type,
                               @RequestParam(required = false) Integer week,
                               @RequestParam(required = false) MultipartFile file,
-                              @RequestParam(required = false) Integer deadline)
+                              @RequestParam(required = false) Integer deadline,
+                              @RequestParam(required = false) String forward)
             throws IOException {
         CoursePost newAnnouncement = new CoursePost();
         newAnnouncement.setAttachedId(courseDBId);
@@ -198,7 +204,7 @@ public class TeacherCourseController {
         newAnnouncement.setTitle(title);
         newAnnouncement.setContent(content);
         newAnnouncement.setType(type);
-        if (file != null) {
+        if (!file.isEmpty()) {
             String localFilePath = announceFileDir + courseDBId + "_" + currentTime + "_" + file.getOriginalFilename();
             File localFile = new File(localFilePath);
             file.transferTo(localFile);
@@ -208,16 +214,22 @@ public class TeacherCourseController {
             newAnnouncement.setHasFile(false);
             newAnnouncement.setFilePath("");
         }
+        if (week != null) {
+            newAnnouncement.setWeek(week);
+        } else {
+            newAnnouncement.setWeek(-1);
+        }
         if (deadline != null) {
             newAnnouncement.setHasDeadline(true);
             newAnnouncement.setDeadline(deadline);
-            newAnnouncement.setWeek(week);
         } else {
             newAnnouncement.setHasDeadline(false);
             newAnnouncement.setDeadline(-1);
-            newAnnouncement.setWeek(-1);
         }
         coursePostRepository.save(newAnnouncement);
+        if (forward != null) {
+            return "redirect:/teacher/course/" + courseDBId + "/" + forward;
+        }
         return "redirect:/teacher/course/" + courseDBId + "/announcement";
     }
 
@@ -231,13 +243,14 @@ public class TeacherCourseController {
     public ResponseEntity<InputStreamResource> getAnnouncementFile(long id) throws FileNotFoundException {
         String localFilePath = coursePostRepository.findById(id).getFilePath();
         String fileName = Paths.get(localFilePath).getFileName().toString();
-        File file = new File(localFilePath);
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .contentLength(file.length())
-                .body(resource);
+        return FileUtil.download(localFilePath, fileName);
+    }
+
+    @RequestMapping("/getHomeWorkFile")
+    public ResponseEntity<InputStreamResource> getHomeworkFile(long id) throws FileNotFoundException {
+        String localFilePath = courseStudentMessageRepository.findById(id).getFilePath();
+        String fileName = Paths.get(localFilePath).getFileName().toString();
+        return FileUtil.download(localFilePath, fileName);
     }
 
     @RequestMapping("/{courseDBId}/homework")
@@ -246,6 +259,7 @@ public class TeacherCourseController {
         ModelAndView mav = new ModelAndView("teacher/course/sub/homework");
         List<CourseStudentMessage> messages = courseStudentMessageRepository
                 .findByAttachedIdAndTypeAndHomeworkWeek(courseDBId, 0, week);
+        mav.addObject("week", week);
         mav.addObject("homeworkList", messages);
         mav.addObject("navId", 2);
         return mav;
@@ -263,7 +277,6 @@ public class TeacherCourseController {
         List<CourseStudentMessage> questions = courseStudentMessageRepository.findByAttachedIdAndType(courseDBId, 1);
         mav.addObject("questions", questions);
         mav.addObject("navId", 3);
-
         return mav;
     }
 
@@ -273,6 +286,17 @@ public class TeacherCourseController {
         return courseStudentMessageRepository.findById(id);
     }
 
+    @PostMapping("/answer")
+    public String answerQuestion(long questionId, String response) {
+        CourseStudentMessage message = courseStudentMessageRepository.findById(questionId);
+        long courseDBId = message.getAttachedId();
+        courseStudentMessageRepository.delete(message);
+        message.setHasResponse(true);
+        message.setResponse(response);
+        courseStudentMessageRepository.save(message);
+        return "redirect:/teacher/course/" + courseDBId + "/question";
+    }
+
     @RequestMapping("/{courseDBId}/discussion")
     public ModelAndView discussion(@PathVariable long courseDBId) {
         ModelAndView mav = new ModelAndView("teacher/course/sub/discussion");
@@ -280,6 +304,38 @@ public class TeacherCourseController {
         mav.addObject("discussions", discussions);
         mav.addObject("navId", 4);
         return mav;
+    }
+
+    @GetMapping("/getDiscussion")
+    public @ResponseBody
+    Map<String, Object> getDiscussion(long id, long courseId) {
+        CoursePost discussion = coursePostRepository.findById(id);
+        List<CourseDiscussion> students = courseDiscussionRepository
+                .findByAttachedIdAndDiscussionId(courseId, id);
+        Map<String, Object> objectMap = new HashMap<>(3);
+        objectMap.put("discussion", discussion);
+        objectMap.put("students", students);
+        if (students.size() == 0) {
+            objectMap.put("selected", false);
+        } else {
+            objectMap.put("selected", true);
+        }
+        return objectMap;
+    }
+
+    //TODO finish the function
+    @PostMapping("/scoreDiscussion")
+    public String scoreDiscussionGroup(long courseDBId, long discussionId, int score) {
+        List<CourseDiscussion> students = courseDiscussionRepository.findByAttachedIdAndDiscussionId(courseDBId, discussionId);
+        for (CourseDiscussion student : students) {
+            CourseRegularGradeRecord newRecord = new CourseRegularGradeRecord();
+            newRecord.setAttachedId(courseDBId);
+            newRecord.setStudentId(student.getStudentId());
+            newRecord.setEventName("研讨");
+            newRecord.setScore(student.getRatio() * score);
+            courseRegularGradeRecordRepository.save(newRecord);
+        }
+        return "redirect:/teacher/course/" + courseDBId + "/discussion";
     }
 
     @RequestMapping("/{courseDBId}/weight")
@@ -292,8 +348,18 @@ public class TeacherCourseController {
     }
 
     @PostMapping("/updateWeight/{courseDBId}")
-    public String updateWeight(@PathVariable String courseDBId,
+    public String updateWeight(@PathVariable long courseDBId,
                                long[] id, double[] ratio) {
+        double sum = Arrays.stream(ratio).sum();
+        for (int i = 0; i < ratio.length; i++) {
+            ratio[i] = ratio[i] / sum;
+        }
+        for (int i = 0; i < id.length; i++) {
+            CourseRegularGradeEvent event = courseRegularGradeEventRepository.findById(id[i]);
+            courseRegularGradeEventRepository.delete(event);
+            event.setRatio(ratio[i]);
+            courseRegularGradeEventRepository.save(event);
+        }
         return "redirect:/teacher/course/" + courseDBId + "/weight";
     }
 }

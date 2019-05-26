@@ -10,5 +10,7 @@ public interface PostgraduatePostRepository extends CrudRepository<PostgraduateP
 
     List<PostgraduatePost> findAll();
 
+    List<PostgraduatePost> findByTeacherId(String teacherId);
+
     PostgraduatePost findById(long id);
 }

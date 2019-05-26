@@ -19,6 +19,11 @@ public class LoginController {
         this.userRepository = userRepository;
     }
 
+    @RequestMapping("/")
+    public String home() {
+        return "redirect:/login";
+    }
+
     @RequestMapping("/login")
     public String loginPage() {
         return "login";
@@ -32,19 +37,23 @@ public class LoginController {
             User user = userOptional.get();
             System.out.println(user.toString());
             if (password.equals(user.getPassword())) {
-                int role = user.getRole();
+                int grade = user.getGrade();
                 HttpSession session = request.getSession();
                 session.setAttribute("userId", userId);
-                if (role == 0) {
+                session.setAttribute("grade", user.getGrade());
+                if (grade == -1) {
                     session.setAttribute("role", "teacher");
                     return "redirect:/teacher";
+                } else if (grade == 0) {
+                    session.setAttribute("role", "student");
+                    return "redirect:/student/course/list";
                 } else {
                     session.setAttribute("role", "student");
-                    return "redirect:/student";
+                    return "redirect:/student/postgraduate/timetable";
                 }
             }
         }
         return "redirect:/login";
     }
-
 }
+

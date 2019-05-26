@@ -6,5 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface GraduationWeightRepository extends CrudRepository<GraduationWeight, Long> {
-    List<GraduationWeight> findByYearAndSemester(int year, int semester);
+    List<GraduationWeight> findByTeacherIdAndYearAndSemester(String teacherId, int year, int semester);
+
+    GraduationWeight findById(long id);
 }

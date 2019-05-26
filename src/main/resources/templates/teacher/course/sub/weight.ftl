@@ -17,7 +17,7 @@
         <div class="panel panel-default" style="margin-top: 15px">
             <div class="panel-heading">学生名单</div>
             <div class="panel-body">
-                <form action="/teacher/course/updateWeight/${courseId}">
+                <form action="/teacher/course/updateWeight/${courseId}" method="post">
                     <table class="table table-hover">
                         <thead>
                         <tr>

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface CourseRegularGradeEventRepository extends CrudRepository<CourseRegularGradeEvent, Long> {
     List<CourseRegularGradeEvent> findByAttachedId(long attachedId);
+
+    CourseRegularGradeEvent findById(long id);
 }

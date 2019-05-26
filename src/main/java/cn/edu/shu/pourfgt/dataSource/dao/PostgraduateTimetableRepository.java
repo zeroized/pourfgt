@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface PostgraduateTimetableRepository extends CrudRepository<PostgraduateTimetable, Long> {
     List<PostgraduateTimetable> findByForYearAndForType(int forYear, int forType);
+
+    List<PostgraduateTimetable> findByTeacherIdAndForYearAndForType(String teacherId, int forYear, int forType);
 }

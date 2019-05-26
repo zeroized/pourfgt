@@ -16,11 +16,11 @@ public class PostgraduateStudentSubmission {
     private long studentId;
     private String studentName;
 
-    private String filePath;
+    private boolean hasNotification = false;
+    private long notifyDate = -1;
+    private String filePath = "";
     private boolean hasResponse = false;
-    private String response;
-    private boolean hasResponseFile = false;
-    private String responseFilePath = "";
+    private String response = "";
 
     public long getId() {
         return id;
@@ -62,6 +62,22 @@ public class PostgraduateStudentSubmission {
         this.studentName = studentName;
     }
 
+    public boolean isHasNotification() {
+        return hasNotification;
+    }
+
+    public void setHasNotification(boolean hasNotification) {
+        this.hasNotification = hasNotification;
+    }
+
+    public long getNotifyDate() {
+        return notifyDate;
+    }
+
+    public void setNotifyDate(long notifyDate) {
+        this.notifyDate = notifyDate;
+    }
+
     public String getFilePath() {
         return filePath;
     }
@@ -84,21 +100,5 @@ public class PostgraduateStudentSubmission {
 
     public void setResponse(String response) {
         this.response = response;
-    }
-
-    public boolean isHasResponseFile() {
-        return hasResponseFile;
-    }
-
-    public void setHasResponseFile(boolean hasResponseFile) {
-        this.hasResponseFile = hasResponseFile;
-    }
-
-    public String getResponseFilePath() {
-        return responseFilePath;
-    }
-
-    public void setResponseFilePath(String responseFilePath) {
-        this.responseFilePath = responseFilePath;
     }
 }

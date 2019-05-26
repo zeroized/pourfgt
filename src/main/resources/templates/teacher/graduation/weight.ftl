@@ -26,15 +26,15 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <#--                        <#list events as event>-->
-                        <#--                            <tr>-->
-                        <#--                                <td>${event.name}</td>-->
-                        <#--                                <td>-->
-                        <#--                                    <input type="text" name="ratio" value="${event.ratio}">-->
-                        <#--                                    <input type="hidden" name="id" value="${event.id}">-->
-                        <#--                                </td>-->
-                        <#--                            </tr>-->
-                        <#--                        </#list>-->
+                        <#list events as event>
+                            <tr>
+                                <td>${event.event}</td>
+                                <td>
+                                    <input type="text" name="ratio" value="${event.ratio}">
+                                    <input type="hidden" name="id" value="${event.id}">
+                                </td>
+                            </tr>
+                        </#list>
                         </tbody>
                     </table>
                     <div class="form-group">

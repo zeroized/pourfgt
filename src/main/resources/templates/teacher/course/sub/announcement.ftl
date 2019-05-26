@@ -81,14 +81,17 @@
                     <tr>
                         <td>标题</td>
                         <td>发布日期</td>
+                        <td>类型</td>
                         <td>操作</td>
                     </tr>
                     </thead>
                     <tbody>
+                    <#assign types=["通知","资料","作业","研讨"]>
                     <#list announcements as announcement>
                         <tr>
                             <td>${announcement.title}</td>
-                            <td>${announcement.createTime}</td>
+                            <td>${announcement.createTime?number_to_date}</td>
+                            <td>${types[announcement.type]}</td>
                             <td>
                                 <button class="btn btn-primary"
                                         data-toggle="modal" data-target="#announcementDetail"
@@ -114,6 +117,16 @@
                 <h4 class="modal-title" id="myModalLabel">发布详情</h4>
             </div>
             <div class="modal-body">
+                <h4>标题</h4>
+                <p id="post-title"></p>
+                <h4>类型</h4>
+                <p id="post-type"></p>
+                <h4>内容</h4>
+                <p id="post-content"></p>
+                <h4>发布时间</h4>
+                <p id="post-create"></p>
+                <h4>附件</h4>
+                <a id="post-file"></a>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -123,38 +136,28 @@
 </div>
 <script>
     $('#announcementDetail').on('show.bs.modal', function (event) {
+        var modal = $(this);
         var button = $(event.relatedTarget); // Button that triggered the modal
         var id = button.data("id");
         // var courseId=button.data("queryCourse");
         //TODO adding ajax query here
-        $.getJSON("/teacher/course/getAnnouncement?id=" + id, function (data) {
-            var body = modal.find('.modal-body');
-            var types = ["信息", "资料", "作业", "研讨"];
-            body.append("<h4>标题</h4>" +
-                "<p>" + data.title + "</p>");
-            body.append("<h4>内容</h4>" +
-                "<p>" + data.content + "</p>");
+        $.getJSON("/teacher/course/getPost?id=" + id, function (data) {
+            var types = ["通知", "资料", "作业", "研讨"];
+            var post = data;
             var createTime = new Date();
-            createTime.setTime(data.createTime);
-            body.append("<h4>发布时间</h4>" +
-                "<p>" + createTime + "</p>");
-            body.append("<h4>信息类型</h4>" +
-                "<p>" + types[data.type] + "</p>");
-            if (data.hasFile) {
-                body.append("<h4>附件</h4>" +
-                    "<a href=\"/teacher/course/getAnnouncementFile?id=" + id + "\">下载</a>");
-            }
-            if (data.hasDeadline) {
-                var deadline = new Date();
-                deadline.setTime(data.deadline);
-                body.append("<h4>截止日期</h4>" +
-                    "<p>" + deadline + "</p>")
+            createTime.setTime(post.createTime);
+            modal.find("#post-title").text(post.title);
+            modal.find("#post-content").text(post.content);
+            modal.find("#post-create").text(createTime);
+            modal.find("#post-type").text(types[post.type]);
+            if (!post.hasFile) {
+                modal.find("#post-file").text("无附件");
+            } else {
+                modal.find("#post-file").text("下载");
+                modal.find("#post-file").attr("href", "/teacher/course/getAnnouncementFile?id=" + id);
             }
 
         });
-        var modal = $(this);
-        // modal.find('.modal-title').text(studentId + "成绩详细");
-        // modal.find('#studentIdInput').val(studentId);
     });
 </script>
 </body>

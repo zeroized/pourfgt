@@ -8,5 +8,7 @@ import java.util.List;
 public interface GraduationStudentMessageRepository extends CrudRepository<GraduationStudentMessage, Long> {
     List<GraduationStudentMessage> findByYearAndSemester(int year, int semester);
 
+    List<GraduationStudentMessage> findByTeacherIdAndYearAndSemester(String teacherId, int year, int semester);
+
     GraduationStudentMessage findById(long id);
 }

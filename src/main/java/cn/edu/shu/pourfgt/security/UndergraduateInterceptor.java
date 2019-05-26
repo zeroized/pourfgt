@@ -7,18 +7,27 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-public class AuthInterceptor implements HandlerInterceptor {
+public class UndergraduateInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession();
-        String userId = (String) session.getAttribute("userId");
-        if (userId == null) {
+        Integer grade = (Integer) session.getAttribute("grade");
+        if (grade == null) {
             response.sendRedirect("/login");
             return false;
         } else {
-            String role = (String) session.getAttribute("role");
-            return request.getRequestURI().contains(role);
+            if (0 == grade) {
+                return true;
+            } else {
+                if (grade == 1) {
+                    response.sendRedirect("/student/postgraduate/timetable");
+                    return false;
+                } else {
+                    response.sendRedirect("/teacher/course/list");
+                    return false;
+                }
+            }
         }
     }
 

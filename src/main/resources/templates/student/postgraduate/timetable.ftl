@@ -27,7 +27,7 @@
                     <tbody>
                     <#list events as event>
                         <tr>
-                            <td>${event.keyDate}</td>
+                            <td>${event.keyDate?number_to_date}</td>
                             <td>${event.event}</td>
                         </tr>
                     </#list>

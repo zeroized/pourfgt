@@ -8,5 +8,10 @@ import java.util.List;
 public interface PostgraduateStudentRepository extends CrudRepository<PostgraduateStudent, Long> {
     List<PostgraduateStudent> findByActive(boolean active);
 
+    List<PostgraduateStudent> findByTeacherIdAndActive(String teacherId, boolean active);
+
     PostgraduateStudent findById(long id);
+
+    PostgraduateStudent findFirstByStudentId(long studentId);
+
 }

@@ -27,7 +27,7 @@
                     <tbody>
                     <#list messages as message>
                         <tr>
-                            <td>${message.createTime}</td>
+                            <td>${message.createTime?number_to_date}</td>
                             <td>${message.type}</td>
                             <td>${message.title}</td>
                             <td>

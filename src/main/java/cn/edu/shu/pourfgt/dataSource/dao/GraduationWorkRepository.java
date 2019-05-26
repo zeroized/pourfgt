@@ -9,4 +9,8 @@ public interface GraduationWorkRepository extends CrudRepository<GraduationWork,
     List<GraduationWork> findByYear(int year);
 
     List<GraduationWork> findByYearAndSemester(int year, int semester);
+
+    List<GraduationWork> findByTeacherIdAndYearAndSemester(String teacherId, int year, int semester);
+
+    GraduationWork findFirstByStudentIdAndYearAndSemester(long studentId, int year, int semester);
 }

@@ -10,6 +10,7 @@ public class PostgraduateTimetable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+    private String teacherId;
     private int forYear;
     private int forType;
     private long keyDate;
@@ -21,6 +22,14 @@ public class PostgraduateTimetable {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getTeacherId() {
+        return teacherId;
+    }
+
+    public void setTeacherId(String teacherId) {
+        this.teacherId = teacherId;
     }
 
     public int getForYear() {

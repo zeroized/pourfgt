@@ -1,22 +1,23 @@
 package cn.edu.shu.pourfgt.controller;
 
-import cn.edu.shu.pourfgt.dataSource.dao.CourseInfoRepository;
-import cn.edu.shu.pourfgt.dataSource.dao.CoursePostRepository;
-import cn.edu.shu.pourfgt.dataSource.dao.CourseStudentMessageRepository;
-import cn.edu.shu.pourfgt.dataSource.dao.CourseStudentRepository;
-import cn.edu.shu.pourfgt.dataSource.entity.CourseInfo;
-import cn.edu.shu.pourfgt.dataSource.entity.CoursePost;
-import cn.edu.shu.pourfgt.dataSource.entity.CourseStudent;
-import cn.edu.shu.pourfgt.dataSource.entity.CourseStudentMessage;
+import cn.edu.shu.pourfgt.dataSource.dao.*;
+import cn.edu.shu.pourfgt.dataSource.entity.*;
+import cn.edu.shu.pourfgt.util.FileUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,39 +31,57 @@ public class StudentCourseController {
     private final CourseInfoRepository courseInfoRepository;
     private final CoursePostRepository coursePostRepository;
     private final CourseStudentMessageRepository courseStudentMessageRepository;
+    private final CourseDiscussionRepository courseDiscussionRepository;
+
+    @Value("${course.current.year}")
+    private int currentYear;
+    @Value("${course.current.semester}")
+    private int currentSemester;
 
 
     public StudentCourseController(@Value("${course.announcement.file-path}") String announceFileDir,
                                    CourseStudentRepository courseStudentRepository,
                                    CourseInfoRepository courseInfoRepository,
                                    CoursePostRepository coursePostRepository,
-                                   CourseStudentMessageRepository courseStudentMessageRepository) {
+                                   CourseStudentMessageRepository courseStudentMessageRepository, CourseDiscussionRepository courseDiscussionRepository) {
         this.announceFileDir = announceFileDir;
         this.courseStudentRepository = courseStudentRepository;
         this.courseInfoRepository = courseInfoRepository;
         this.coursePostRepository = coursePostRepository;
         this.courseStudentMessageRepository = courseStudentMessageRepository;
+        this.courseDiscussionRepository = courseDiscussionRepository;
     }
 
     @ModelAttribute
-    public void addCourseInfo(@PathVariable(required = false) Long courseDBId, Model model) {
+    public void initModel(@PathVariable(required = false) Long courseDBId, HttpServletRequest request, Model model) {
         if (courseDBId != null) {
             long id = courseDBId;
             CourseInfo courseInfo = courseInfoRepository.findById(id);
             model.addAttribute("courseId", courseInfo.getId());
             model.addAttribute("courseName", courseInfo.getCourseName());
         }
+        HttpSession session = request.getSession();
+        Long studentId = Long.valueOf((String) session.getAttribute("userId"));
+        model.addAttribute("studentId", studentId);
         model.addAttribute("leftNavId", 0);
+        model.addAttribute("availableNavs", new Integer[]{0, 1});
     }
 
     @RequestMapping("/list")
-    public ModelAndView courseList() {
+    public ModelAndView courseList(Model model) {
         ModelAndView mav = new ModelAndView("student/course/list");
-        List<CourseStudent> courses = courseStudentRepository.findByStudentId(18120001);
-        List<Long> courseIds = courses.stream().map(CourseStudent::getAttachedId).collect(Collectors.toList());
-        mav.addObject("currYear", 2018);
-        mav.addObject("currSemester", 0);
+        long studentId = (Long) model.asMap().get("studentId");
+        List<CourseStudent> courses = courseStudentRepository.findByStudentId(studentId);
+        List<Long> courseIds = courses.stream()
+                .map(CourseStudent::getAttachedId)
+                .collect(Collectors.toList());
+        List<String> courseNames = courseIds.stream()
+                .map(x -> courseInfoRepository.findById(x.longValue()).getCourseName())
+                .collect(Collectors.toList());
+        mav.addObject("currYear", currentYear);
+        mav.addObject("currSemester", currentSemester);
         mav.addObject("courses", courses);
+        mav.addObject("courseNames", courseNames);
         return mav;
     }
 
@@ -84,6 +103,13 @@ public class StudentCourseController {
     public @ResponseBody
     CoursePost getHomework(long id) {
         return coursePostRepository.findById(id);
+    }
+
+    @RequestMapping("/getPostFile")
+    public ResponseEntity<InputStreamResource> getAnnouncementFile(long id) throws FileNotFoundException {
+        String localFilePath = coursePostRepository.findById(id).getFilePath();
+        String fileName = Paths.get(localFilePath).getFileName().toString();
+        return FileUtil.download(localFilePath, fileName);
     }
 
     @PostMapping("/doHomework")
@@ -128,6 +154,42 @@ public class StudentCourseController {
         return courseStudentMessageRepository.findById(id);
     }
 
+    @RequestMapping("/{courseDBId}/discussion")
+    public ModelAndView discussion(@PathVariable long courseDBId) {
+        ModelAndView mav = new ModelAndView("student/course/sub/discussion");
+        List<CoursePost> discussions = coursePostRepository.findByAttachedIdAndType(courseDBId, 3);
+        List<CourseDiscussion> discussionSelections = courseDiscussionRepository.findByAttachedId(courseDBId);
+        List<Long> selected = discussionSelections.stream()
+                .map(CourseDiscussion::getDiscussionId)
+                .distinct()
+                .collect(Collectors.toList());
+        List<CoursePost> available = discussions.stream()
+                .filter(x -> !selected.contains(x.getId()))
+                .collect(Collectors.toList());
+        mav.addObject("discussions", available);
+        mav.addObject("navId", 3);
+        return mav;
+    }
+
+    @GetMapping("/getDiscussion")
+    public @ResponseBody
+    CoursePost getDiscussion(long id) {
+        return coursePostRepository.findById(id);
+    }
+
+    @PostMapping("/selectDiscussion")
+    public String selectDiscussion(long courseDBId, long discussionId, long[] studentId, long[] ratio) {
+        for (int i = 0; i < studentId.length; i++) {
+            CourseDiscussion newDiscussions = new CourseDiscussion();
+            newDiscussions.setAttachedId(courseDBId);
+            newDiscussions.setDiscussionId(discussionId);
+            newDiscussions.setStudentId(studentId[i]);
+            newDiscussions.setRatio(ratio[i]);
+            courseDiscussionRepository.save(newDiscussions);
+        }
+        return "redirect:/student/course/" + courseDBId + "/discussion";
+    }
+
     private CourseStudentMessage buildCourseStudentMessage(int type, long courseDBId, String title, String content,
                                                            MultipartFile file) throws IOException {
         CourseStudentMessage newQuestion = new CourseStudentMessage();
@@ -138,7 +200,7 @@ public class StudentCourseController {
         newQuestion.setContent(content);
         long currentTime = new Date().getTime();
         newQuestion.setCreateTime(currentTime);
-        if (file != null) {
+        if (!file.isEmpty()) {
             String localFilePath = announceFileDir + courseDBId + "_" + currentTime + "_" + file.getOriginalFilename();
             File localFile = new File(localFilePath);
             file.transferTo(localFile);
@@ -147,4 +209,6 @@ public class StudentCourseController {
         }
         return newQuestion;
     }
+
+
 }

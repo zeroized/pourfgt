@@ -1,13 +1,7 @@
 package cn.edu.shu.pourfgt.controller;
 
-import cn.edu.shu.pourfgt.dataSource.dao.PostgraduatePostRepository;
-import cn.edu.shu.pourfgt.dataSource.dao.PostgraduateStudentMessageRepository;
-import cn.edu.shu.pourfgt.dataSource.dao.PostgraduateStudentSubmissionRepository;
-import cn.edu.shu.pourfgt.dataSource.dao.PostgraduateTimetableRepository;
-import cn.edu.shu.pourfgt.dataSource.entity.PostgraduatePost;
-import cn.edu.shu.pourfgt.dataSource.entity.PostgraduateStudentMessage;
-import cn.edu.shu.pourfgt.dataSource.entity.PostgraduateStudentSubmission;
-import cn.edu.shu.pourfgt.dataSource.entity.PostgraduateTimetable;
+import cn.edu.shu.pourfgt.dataSource.dao.*;
+import cn.edu.shu.pourfgt.dataSource.entity.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.datetime.DateFormatter;
 import org.springframework.stereotype.Controller;
@@ -17,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -26,14 +22,22 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/student/postgraduate")
 public class StudentPostgraduateController {
+    private final PostgraduateStudentRepository postgraduateStudentRepository;
     private final PostgraduateTimetableRepository postgraduateTimetableRepository;
     private final PostgraduatePostRepository postgraduatePostRepository;
     private final PostgraduateStudentMessageRepository postgraduateStudentMessageRepository;
     private final PostgraduateStudentSubmissionRepository postgraduateStudentSubmissionRepository;
     @Value("${course.announcement.file-path}")
     private String postFileDir;
+    @Value("${course.current.year}")
+    private int currentYear;
 
-    public StudentPostgraduateController(PostgraduateTimetableRepository postgraduateTimetableRepository, PostgraduatePostRepository postgraduatePostRepository, PostgraduateStudentMessageRepository postgraduateStudentMessageRepository, PostgraduateStudentSubmissionRepository postgraduateStudentSubmissionRepository) {
+    public StudentPostgraduateController(PostgraduateStudentRepository postgraduateStudentRepository,
+                                         PostgraduateTimetableRepository postgraduateTimetableRepository,
+                                         PostgraduatePostRepository postgraduatePostRepository,
+                                         PostgraduateStudentMessageRepository postgraduateStudentMessageRepository,
+                                         PostgraduateStudentSubmissionRepository postgraduateStudentSubmissionRepository) {
+        this.postgraduateStudentRepository = postgraduateStudentRepository;
         this.postgraduateTimetableRepository = postgraduateTimetableRepository;
         this.postgraduatePostRepository = postgraduatePostRepository;
         this.postgraduateStudentMessageRepository = postgraduateStudentMessageRepository;
@@ -47,15 +51,23 @@ public class StudentPostgraduateController {
     }
 
     @ModelAttribute
-    public void addLeftNav(Model model) {
+    public void initModel(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Long studentId = Long.valueOf((String) session.getAttribute("userId"));
+        PostgraduateStudent student = postgraduateStudentRepository.findFirstByStudentId(studentId);
+        model.addAttribute("studentId", studentId);
+        model.addAttribute("type", student.getType());
+        model.addAttribute("year", student.getYear());
+        model.addAttribute("studentName", student.getStudentName());
         model.addAttribute("leftNavId", 2);
+        model.addAttribute("availableNavs", new Integer[]{2});
     }
 
     @RequestMapping("/timetable")
-    public ModelAndView timetable() {
+    public ModelAndView timetable(Model model) {
         ModelAndView mav = new ModelAndView("student/postgraduate/timetable");
-        int year = 2019;
-        int type = 0;
+        int year = (Integer) model.asMap().get("year");
+        int type = (Integer) model.asMap().get("type");
         List<PostgraduateTimetable> events = postgraduateTimetableRepository
                 .findByForYearAndForType(year, type);
         mav.addObject("events", events);
@@ -64,10 +76,10 @@ public class StudentPostgraduateController {
     }
 
     @RequestMapping("/post")
-    public ModelAndView post() {
+    public ModelAndView post(Model model) {
         ModelAndView mav = new ModelAndView("student/postgraduate/post");
-        int year = 2019;
-        int type = 0;
+        int year = (Integer) model.asMap().get("year");
+        int type = (Integer) model.asMap().get("type");
         List<PostgraduatePost> posts = postgraduatePostRepository
                 .findAll();
         List<PostgraduatePost> displayPosts = posts.stream()
@@ -82,7 +94,8 @@ public class StudentPostgraduateController {
     }
 
     @GetMapping("/getPost")
-    public PostgraduatePost getPost(long id) {
+    public @ResponseBody
+    PostgraduatePost getPost(long id) {
         return postgraduatePostRepository.findById(id);
     }
 
@@ -110,7 +123,7 @@ public class StudentPostgraduateController {
         newMessage.setYear(year);
         newMessage.setType(type);
         newMessage.setStudentId(studentId);
-        if (file != null) {
+        if (!file.isEmpty()) {
             String localFilePath = postFileDir + type + "_" + studentId + "_" + currentTime + "_" + file.getOriginalFilename();
             File localFile = new File(localFilePath);
             file.transferTo(localFile);
@@ -132,9 +145,9 @@ public class StudentPostgraduateController {
     }
 
     @RequestMapping("/submit")
-    public ModelAndView submission() {
+    public ModelAndView submission(Model model) {
         ModelAndView mav = new ModelAndView("student/postgraduate/submit");
-        long studentId = 18720001;
+        long studentId = (Long) model.asMap().get("studentId");
         List<PostgraduateStudentSubmission> submissions = postgraduateStudentSubmissionRepository
                 .findByStudentId(studentId);
         mav.addObject("submissions", submissions);
@@ -143,10 +156,10 @@ public class StudentPostgraduateController {
     }
 
     @PostMapping("/submitEvent")
-    public String submit(int type, MultipartFile file) throws IOException {
+    public String submit(int type, MultipartFile file, Model model) throws IOException {
         PostgraduateStudentSubmission newSubmission = new PostgraduateStudentSubmission();
-        long studentId = 18120001;
-        String studentName = "张三";
+        long studentId = (Long) model.asMap().get("studentId");
+        String studentName = (String) model.asMap().get("studentName");
         newSubmission.setType(type);
         long currentTime = new Date().getTime();
         newSubmission.setSubmitDate(currentTime);

@@ -6,5 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface GraduationTimetableRepository extends CrudRepository<GraduationTimetable, Long> {
-    List<GraduationTimetable> findByYearAndSemester(int year, int semester);
+    List<GraduationTimetable> findByTeacherIdAndYearAndSemester(String teacherId, int year, int semester);
 }

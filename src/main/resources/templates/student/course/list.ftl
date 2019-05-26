@@ -32,7 +32,7 @@
                     <#assign semesters=["秋季","冬季","春季","夏季"]>
                     <#list courses as course>
                         <tr>
-                            <td><a href="/student/course/${course.attachedId}">${course.attachedId}</a></td>
+                            <td><a href="/student/course/${course.attachedId}">${courseNames[course_index]}</a></td>
                             <td>${course.score}</td>
                             <td>激活</td>
                         </tr>

@@ -104,6 +104,8 @@
     $('#scoreDetail').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var studentId = button.data("student");
+        var modal = $(this);
+        modal.find('tbody').empty();
         // var courseId=button.data("queryCourse");
         //TODO adding ajax query here
         $.getJSON("/teacher/course/${courseId}/getScore/" + studentId, function (data) {
@@ -115,8 +117,6 @@
                     "</tr>")
             })
         });
-        var modal = $(this);
-        modal.find('.modal-title').text(studentId + "成绩详细");
         modal.find('#studentIdInput').val(studentId);
     });
 </script>

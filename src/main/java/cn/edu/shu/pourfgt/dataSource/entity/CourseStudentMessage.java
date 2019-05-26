@@ -20,8 +20,8 @@ public class CourseStudentMessage {
 
     private String title;
     private String content;
-    private boolean hasFile;
-    private String filePath;
+    private boolean hasFile = false;
+    private String filePath = "";
 
     private boolean hasResponse = false;
     private String response = "";

@@ -4,9 +4,9 @@
     <li><a href="/student/course/${courseId}">${courseName}</a></li>
 </ol>
 <ul class="nav nav-pills" style="margin-top: 15px">
-    <#assign navs=["homework","message","question"]>
-    <#assign navNames=["查看作业","查看消息","查看提问"]>
-    <#list 0..2 as index>
+    <#assign navs=["homework","message","question","discussion"]>
+    <#assign navNames=["查看作业","查看消息","查看提问","研讨选题"]>
+    <#list 0..3 as index>
         <#if index==navId>
             <li role="presentation" class="active">
                 <a href="#">

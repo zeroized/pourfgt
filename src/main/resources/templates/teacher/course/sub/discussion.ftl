@@ -17,7 +17,7 @@
             <div class="panel-heading">发布</div>
             <div class="panel-body">
                 <form class="form-horizontal" enctype="multipart/form-data"
-                      action="/teacher/course/post/${courseId}" method="post">
+                      action="/teacher/course/addDiscussion/${courseId}" method="post">
                     <div class="form-group">
                         <label for="title" class="control-label col-md-3">标题</label>
                         <div class="col-md-7">
@@ -32,8 +32,8 @@
                                    name="content" id="content">
                         </div>
                     </div>
-                    <input type="hidden" class="form-control" name="type" value="3">
-
+                    <input type="hidden" name="type" value="3">
+                    <input type="hidden" name="forward" value="discussion">
                     <div class="form-group">
                         <label for="file" class="control-label col-md-3">附件</label>
                         <div class="col-md-7">
@@ -47,6 +47,17 @@
                                 <span class="input-group-addon">第</span>
                                 <input type="text" class="form-control"
                                        name="week" id="week">
+                                <span class="input-group-addon">周</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="deadline" class="control-label col-md-3">选题截至</label>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-addon">第</span>
+                                <input type="text" class="form-control"
+                                       name="deadline" id="deadline">
                                 <span class="input-group-addon">周</span>
                             </div>
                         </div>
@@ -70,7 +81,7 @@
                     <#list discussions as discussion>
                         <tr>
                             <td>${discussion.title}</td>
-                            <td>${discussion.createTime}</td>
+                            <td>${discussion.createTime?number_to_date}</td>
                             <td>
                                 <button class="btn btn-primary"
                                         data-toggle="modal" data-target="#discussionDetail"
@@ -96,6 +107,32 @@
                 <h4 class="modal-title" id="myModalLabel">发布详情</h4>
             </div>
             <div class="modal-body">
+                <h4>标题</h4>
+                <p id="discussion-title"></p>
+                <h4>内容</h4>
+                <p id="discussion-content"></p>
+                <h4>发布时间</h4>
+                <p id="discussion-create"></p>
+                <h4>截止时间</h4>
+                <p id="discussion-deadline"></p>
+                <h4>附件</h4>
+                <a id="discussion-file"></a>
+                <h4>选题状态</h4>
+                <p id="discussion-select"></p>
+                <form class="form-horizontal" id="scoreForm"
+                      action="/teacher/course/scoreDiscussion" method="post">
+                    <input type="hidden" name="courseDBId" id="courseDBId" value="${courseId}">
+                    <input type="hidden" name="discussionId" id="discussionId">
+                    <div class="form-group">
+                        <label for="score" class="control-label col-md-3">分数</label>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="score" id="score">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary">打分</button>
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -107,36 +144,33 @@
     $('#discussionDetail').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var id = button.data("id");
-        // var courseId=button.data("queryCourse");
-        //TODO adding ajax query here
-        $.getJSON("/teacher/course/getPost?id=" + id, function (data) {
-            var body = modal.find('.modal-body');
-            var types = ["信息", "资料", "作业", "研讨"];
-            body.append("<h4>标题</h4>" +
-                "<p>" + data.title + "</p>");
-            body.append("<h4>内容</h4>" +
-                "<p>" + data.content + "</p>");
-            var createTime = new Date();
-            createTime.setTime(data.createTime);
-            body.append("<h4>发布时间</h4>" +
-                "<p>" + createTime + "</p>");
-            body.append("<h4>信息类型</h4>" +
-                "<p>" + types[data.type] + "</p>");
-            if (data.hasFile) {
-                body.append("<h4>附件</h4>" +
-                    "<a href=\"/course/getAnnouncementFile?id=" + id + "\">下载</a>");
-            }
-            if (data.hasDeadline) {
-                var deadline = new Date();
-                deadline.setTime(data.deadline);
-                body.append("<h4>截止日期</h4>" +
-                    "<p>" + deadline + "</p>")
-            }
-
-        });
         var modal = $(this);
-        // modal.find('.modal-title').text(studentId + "成绩详细");
-        // modal.find('#studentIdInput').val(studentId);
+        modal.find("#discussionId").val(id);
+        $.getJSON("/teacher/course/getDiscussion?id=" + id + "&courseId=${courseId}", function (data) {
+            var body = modal.find('.modal-body');
+            var students = data.students;
+            var selected = data.selected;
+            var discussion = data.discussion;
+            var createTime = new Date();
+            createTime.setTime(discussion.createTime);
+            modal.find("#discussion-title").text(discussion.title);
+            modal.find("#discussion-content").text(discussion.content);
+            modal.find("#discussion-create").text(createTime);
+            modal.find("#discussion-deadline").text(discussion.deadline);
+            if (!discussion.hasFile) {
+                modal.find("#discussion-file").text("无附件");
+            } else {
+                modal.find("#discussion-file").text("下载");
+                modal.find("#discussion-file").attr("href", "/teacher/course/getAnnouncementFile?id=" + id);
+            }
+            if (!selected) {
+                modal.find("#discussion-select").text("尚未被选");
+                modal.find("#scoreForm").hide();
+            } else {
+                modal.find("#discussion-select").text("已选");
+                modal.find("#scoreForm").show();
+            }
+        });
     });
 </script>
 </body>

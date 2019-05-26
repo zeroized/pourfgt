@@ -17,6 +17,16 @@
         </li>
     </ul>
     <script>
-        $(".nav-stacked>li:eq(${leftNavId})").addClass("active")
+        $(".nav-stacked>li:eq(${leftNavId})").addClass("active");
+        var availableNavs = [];
+        <#list availableNavs as nav>
+        availableNavs.push(${nav});
+        </#list>
+        for (var i = 0; i < 3; i++) {
+            if (availableNavs.indexOf(i) === -1) {
+                $(".nav-stacked>li:eq(${leftNavId})").attr("disable", true);
+            }
+        }
+
     </script>
 </div>

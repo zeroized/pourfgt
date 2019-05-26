@@ -25,10 +25,11 @@
                     </tr>
                     </thead>
                     <tbody>
+                    <#assign types=["论文","文件","文档","源代码"]>
                     <#list submissions as submission>
                         <tr>
-                            <td>${submission.type}</td>
-                            <td>${submission.submitDate}</td>
+                            <td>${types[submission.type]}</td>
+                            <td>${submission.submitDate?number_to_date}</td>
                         </tr>
                     </#list>
                     </tbody>

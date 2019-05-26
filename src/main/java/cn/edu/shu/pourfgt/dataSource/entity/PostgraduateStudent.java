@@ -10,6 +10,7 @@ public class PostgraduateStudent {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+    private String teacherId;
     private int year;
     private long studentId;
     private String studentName;
@@ -22,6 +23,14 @@ public class PostgraduateStudent {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getTeacherId() {
+        return teacherId;
+    }
+
+    public void setTeacherId(String teacherId) {
+        this.teacherId = teacherId;
     }
 
     public int getYear() {

@@ -56,7 +56,7 @@
                     <tbody>
                     <#list questions as question>
                         <tr>
-                            <td>${question.createTime}</td>
+                            <td>${question.createTime?number_to_date}</td>
                             <td>${question.studentId}</td>
                             <td>${question.title}</td>
                             <td>

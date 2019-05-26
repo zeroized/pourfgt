@@ -19,20 +19,23 @@
             <div class="panel-body">
                 <form class="form-horizontal" action="/teacher/postgraduate/timetable" method="get">
                     <div class="form-group">
-                        <label for="year" class="control-label col-md-3">入学年份</label>
-                        <div class="col-md-3">
+                        <label for="year" class="control-label col-md-2">入学年份</label>
+                        <div class="col-md-2">
                             <select class="form-control" name="year" id="year">
-                                <option value="2019">2019</option>
+                                <#list years as year>
+                                    <option value="${year}">${year}</option>
+                                </#list>
                             </select>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="type" class="control-label col-md-3">类型</label>
-                        <div class="col-md-3">
+                        <label for="type" class="control-label col-md-2">类型</label>
+                        <div class="col-md-2">
                             <select class="form-control" name="type" id="type">
                                 <option value="0">学硕</option>
                                 <option value="1">专硕</option>
                             </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary">查看</button>
                         </div>
                     </div>
                 </form>
@@ -47,7 +50,7 @@
                     <tbody>
                     <#list events as event>
                         <tr>
-                            <td>${event.keyDate}</td>
+                            <td>${event.keyDate?number_to_date}</td>
                             <td>${event.event}</td>
                         </tr>
                     </#list>
@@ -74,7 +77,9 @@
                         <label for="year" class="control-label col-md-3">入学年份</label>
                         <div class="col-md-7">
                             <select class="form-control" name="year" id="year">
-                                <option value="2019">2019</option>
+                                <#list years as year>
+                                    <option value="${year}">${year}</option>
+                                </#list>
                             </select>
                         </div>
                     </div>

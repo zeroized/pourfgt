@@ -32,7 +32,7 @@
                         <tr>
                             <td>${submission.event}</td>
                             <td>已提交</td>
-                            <td>${submission.submitDate}</td>
+                            <td>${submission.submitDate?number_to_date}</td>
                         </tr>
                     </#list>
                     <#list notSubmitted as not_keys>
@@ -52,13 +52,15 @@
                         <div class="col-md-5">
                             <select class="form-control" name="event" id="event">
                                 <option value="毕业论文">毕业论文</option>
+                                <option value="毕业设计验收">毕业设计验收</option>
+                                <option value="毕业答辩">毕业答辩</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="file" class="control-label col-md-3">文件</label>
                         <div class="col-md-5">
-                            <input type="file" name="file" id="file">
+                            <input type="file" class="form-control" name="file" id="file">
                         </div>
                     </div>
                     <div class="form-group">

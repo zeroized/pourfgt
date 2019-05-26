@@ -11,9 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -24,8 +29,11 @@ public class StudentGraduationController {
     private final GraduationStudentMessageRepository graduationStudentMessageRepository;
     private final GraduationWeightRepository graduationWeightRepository;
     private final GraduationStudentSubmissionRepository graduationStudentSubmissionRepository;
-    private int currentSemester = 0;
-    private int currentYear = 2018;
+    private final GraduationWorkRepository graduationWorkRepository;
+    @Value("${course.current.year}")
+    private int currentYear;
+    @Value("${course.current.semester}")
+    private int currentSemester;
     @Value("${course.announcement.file-path}")
     private String postFileDir;
 
@@ -33,12 +41,13 @@ public class StudentGraduationController {
                                        GraduationPostRepository graduationPostRepository,
                                        GraduationStudentMessageRepository graduationStudentMessageRepository,
                                        GraduationWeightRepository graduationWeightRepository,
-                                       GraduationStudentSubmissionRepository graduationStudentSubmissionRepository) {
+                                       GraduationStudentSubmissionRepository graduationStudentSubmissionRepository, GraduationWorkRepository graduationWorkRepository) {
         this.graduationTimetableRepository = graduationTimetableRepository;
         this.graduationPostRepository = graduationPostRepository;
         this.graduationStudentMessageRepository = graduationStudentMessageRepository;
         this.graduationWeightRepository = graduationWeightRepository;
         this.graduationStudentSubmissionRepository = graduationStudentSubmissionRepository;
+        this.graduationWorkRepository = graduationWorkRepository;
     }
 
     @InitBinder
@@ -47,17 +56,26 @@ public class StudentGraduationController {
     }
 
     @ModelAttribute
-    public void addLeftNav(Model model) {
+    public void initModel(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        long studentId = Long.parseLong((String) session.getAttribute("userId"));
+        GraduationWork graduationWork = graduationWorkRepository
+                .findFirstByStudentIdAndYearAndSemester(studentId, currentYear, currentSemester);
+        String teacherId = graduationWork.getTeacherId();
+        model.addAttribute("studentId", studentId);
+        model.addAttribute("teacherId", teacherId);
         model.addAttribute("leftNavId", 1);
         model.addAttribute("year", currentYear);
         model.addAttribute("semester", currentSemester);
+        model.addAttribute("availableNavs", new Integer[]{0, 1});
     }
 
     @RequestMapping("/timetable")
-    public ModelAndView timetable() {
+    public ModelAndView timetable(Model model) {
+        String teacherId = (String) model.asMap().get("teacherId");
         ModelAndView mav = new ModelAndView("student/graduation/timetable");
         List<GraduationTimetable> events = graduationTimetableRepository
-                .findByYearAndSemester(currentYear, currentSemester);
+                .findByTeacherIdAndYearAndSemester(teacherId, currentYear, currentSemester);
         mav.addObject("events", events);
         mav.addObject("navId", 0);
         return mav;
@@ -74,7 +92,8 @@ public class StudentGraduationController {
     }
 
     @GetMapping("/getPost")
-    public GraduationPost getPost(long id) {
+    public @ResponseBody
+    GraduationPost getPost(long id) {
         return graduationPostRepository.findById(id);
     }
 
@@ -91,17 +110,19 @@ public class StudentGraduationController {
     @PostMapping("/addMessage")
     public String addMessage(String title, String content,
                              @RequestParam(required = false) MultipartFile file,
-                             @RequestParam(required = false) Date notifyDate) throws IOException {
-        long studentId = 18120001;
+                             @RequestParam(required = false) Date notifyDate, Model model) throws IOException {
+        long studentId = (Long) model.asMap().get("studentId");
+        String teacherId = (String) model.asMap().get("teacherId");
         GraduationStudentMessage newMessage = new GraduationStudentMessage();
         long currentTime = new Date().getTime();
+        newMessage.setTeacherId(teacherId);
         newMessage.setCreateTime(currentTime);
         newMessage.setTitle(title);
         newMessage.setContent(content);
         newMessage.setYear(currentYear);
         newMessage.setSemester(currentSemester);
         newMessage.setStudentId(studentId);
-        if (file != null) {
+        if (!file.isEmpty()) {
             String localFilePath = postFileDir + currentSemester + "-" + currentYear + "_" + studentId + "_" + currentTime + "_" + file.getOriginalFilename();
             File localFile = new File(localFilePath);
             file.transferTo(localFile);
@@ -123,43 +144,31 @@ public class StudentGraduationController {
     }
 
     @RequestMapping("/submit")
-    public ModelAndView submission() {
+    public ModelAndView submission(Model model) {
         ModelAndView mav = new ModelAndView("student/graduation/submit");
-        long studentId = 18120001;
+        long studentId = (Long) model.asMap().get("studentId");
+        String teacherId = (String) model.asMap().get("teacherId");
         List<GraduationWeight> weights = graduationWeightRepository
-                .findByYearAndSemester(currentYear, currentSemester);
-        if (weights.size() == 0) {
-            GraduationStudentSubmission submission = graduationStudentSubmissionRepository
-                    .findFirstByYearAndSemesterAndStudentId(currentYear, currentSemester, studentId);
-            Map<String, GraduationStudentSubmission> eventMap = new HashMap<>(1);
-            if (submission != null) {
-                eventMap.put("毕业论文", submission);
-                mav.addObject("submitted", eventMap);
-                mav.addObject("notSubmitted", new ArrayList<String>());
-            } else {
-                mav.addObject("submitted", eventMap);
-                mav.addObject("notSubmitted", new String[]{"毕业论文"});
-            }
-
-        } else {
-            List<GraduationStudentSubmission> submissions = graduationStudentSubmissionRepository
-                    .findByYearAndSemesterAndStudentId(currentYear, currentSemester, studentId);
-            Map<String, GraduationStudentSubmission> eventMap = new HashMap<>(weights.size());
-            for (GraduationStudentSubmission submission : submissions) {
-                eventMap.put(submission.getEvent(), submission);
-            }
-            List<String> events = weights.stream().map(GraduationWeight::getEvent).collect(Collectors.toList());
-            mav.addObject("submitted", eventMap);
-            mav.addObject("notSubmitted", events.removeAll(eventMap.keySet()));
+                .findByTeacherIdAndYearAndSemester(teacherId, currentYear, currentSemester);
+        List<GraduationStudentSubmission> submissions = graduationStudentSubmissionRepository
+                .findByYearAndSemesterAndStudentId(currentYear, currentSemester, studentId);
+        Map<String, GraduationStudentSubmission> eventMap = new HashMap<>(weights.size());
+        for (GraduationStudentSubmission submission : submissions) {
+            eventMap.put(submission.getEvent(), submission);
         }
+        List<String> events = weights.stream().map(GraduationWeight::getEvent).collect(Collectors.toList());
+        mav.addObject("submitted", eventMap);
+        events.removeAll(eventMap.keySet());
+        mav.addObject("notSubmitted", events);
         mav.addObject("navId", 3);
         return mav;
     }
 
     @PostMapping("/submitEvent")
-    public String submit(String event, MultipartFile file) throws IOException {
+    public String submit(String event, MultipartFile file, Model model) throws IOException {
         GraduationStudentSubmission newSubmission = new GraduationStudentSubmission();
-        long studentId = 18120001;
+        long studentId = (Long) model.asMap().get("studentId");
+
         newSubmission.setYear(currentYear);
         newSubmission.setSemester(currentSemester);
         long currentTime = new Date().getTime();

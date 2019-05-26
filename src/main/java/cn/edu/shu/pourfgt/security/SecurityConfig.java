@@ -8,8 +8,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class SecurityConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new AuthInterceptor())
-                .addPathPatterns("/**")
-                .excludePathPatterns("/login", "/signIn");
+        registry.addInterceptor(new TeacherInterceptor())
+                .addPathPatterns("/teacher/**");
+        registry.addInterceptor(new PostgraduateInterceptor())
+                .addPathPatterns("/student/postgraduate/**");
+        registry.addInterceptor(new UndergraduateInterceptor())
+                .addPathPatterns("/student/course/**", "student/graduation/**");
     }
 }
