@@ -201,7 +201,6 @@ public class TeacherGraduationController {
     public ModelAndView weight(Model model) {
         ModelAndView mav = new ModelAndView("teacher/graduation/weight");
         String teacherId = (String) model.asMap().get("teacherId");
-        //TODO finish the function
         List<GraduationWeight> weights = graduationWeightRepository
                 .findByTeacherIdAndYearAndSemester(teacherId, currentYear, currentSemester);
         if (weights.size() == 0) {
